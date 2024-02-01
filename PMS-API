@@ -1,0 +1,244 @@
+openapi: 3.0.0
+info:
+  title: Prompt Management Service API
+  version: '1.0'
+  description: API for managing projects and their associated prompts, including versioning and visibility management.
+
+servers:
+  - url: 'https://api.promptmanagement.com/v1'
+
+paths:
+  /projects:
+    get:
+      summary: Get All Projects
+      tags:
+        - Projects
+      responses:
+        '200':
+          description: A list of all projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+    post:
+      summary: Create Project
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '201':
+          description: Project created successfully
+
+  /projects/{projectId}:
+    patch:
+      summary: Update Project
+      tags:
+        - Projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '200':
+          description: Project updated successfully
+
+  /projects/{projectId}/prompts:
+    post:
+      summary: Add a new prompt to a project
+      tags:
+        - Prompts
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prompt'
+      responses:
+        '201':
+          description: Prompt added successfully
+    get:
+      summary: Get all prompts for a project
+      tags:
+        - Prompts
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of prompts for the specified project
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prompt'
+
+  /prompts/{promptId}:
+    get:
+      summary: Get a specific prompt by ID
+      tags:
+        - Prompts
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: query
+          schema:
+            type: integer
+            description: Specific version of the prompt to retrieve. If not provided, the latest version will be returned.
+      responses:
+        '200':
+          description: Prompt details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prompt'
+    patch:
+      summary: Update an existing prompt (creates a new version)
+      tags:
+        - Prompts
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prompt'
+      responses:
+        '200':
+          description: Prompt updated successfully, new version created
+
+  /prompts/global:
+    get:
+      summary: Get All Public Prompts
+      tags:
+        - Prompts
+      responses:
+        '200':
+          description: A list of all public prompts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prompt'
+
+
+  /prompts/global/{promptId}:
+    get:
+      summary: Get a specific public prompt by ID
+      tags:
+        - Prompts
+      parameters:
+        - name: promptId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: query
+          schema:
+            type: integer
+            description: Specific version of the prompt to retrieve. If not provided, the latest version will be returned.
+      responses:
+        '200':
+          description: Prompt details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prompt'
+                
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the project
+        name:
+          type: string
+          description: Name of the project
+        description:
+          type: string
+          description: Description of the project
+        createdAt:
+          type: string
+          format: date-time
+          description: Project creation timestamp
+      required:
+        - name
+
+    Prompt:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the prompt
+        projectId:
+          type: string
+          description: Identifier of the project this prompt belongs to
+        name:
+          type: string
+          description: Name of the prompt
+        content:
+          type: string
+          description: The text content of the prompt
+        temperature:
+          type: number
+          format: float
+          description: Temperature setting for the prompt
+        context:
+          type: string
+          description: Context information for the prompt
+        systemMessage:
+          type: string
+          description: Optional system message associated with the prompt
+        outputFormatting:
+          type: string
+          description: Desired output formatting for the prompt response
+        version:
+          type: integer
+          description: Version number of the prompt
+        isPublic:
+          type: boolean
+          description: Flag indicating if the prompt is public
+        createdAt:
+          type: string
+          format: date-time
+          description: Prompt creation timestamp
+      required:
+        - content
+        - projectId
