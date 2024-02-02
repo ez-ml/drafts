@@ -1,70 +1,170 @@
 openapi: 3.0.0
 info:
-  title: Prompt Management Service API
-  version: '1.0'
-  description: API for managing projects and their associated prompts, including versioning and visibility management.
+  title: Prompt Management System API
+  description: API for managing LLM prompts across different lines of business (Namespaces).
+  version: "1.0.0"
 
 servers:
-  - url: 'https://api.promptmanagement.com/v1'
+  - url: 'https://api.yourpromptsystem.com/v1'
 
 paths:
-  /projects:
+  /namespaces:
+    post:
+      summary: Create a new Namespace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceCreate'
+      responses:
+        '201':
+          description: Namespace created successfully
+
     get:
-      summary: Get All Projects
-      tags:
-        - Projects
+      summary: Retrieve the list of all Namespaces
       responses:
         '200':
-          description: A list of all projects
+          description: List of all namespaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Namespace'
+
+  /namespaces/{namespaceId}:
+    get:
+      summary: Get a Namespace by ID
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Namespace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Namespace'
+
+    put:
+      summary: Update a Namespace
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamespaceUpdate'
+      responses:
+        '200':
+          description: Namespace updated successfully
+
+    patch:
+      summary: Set a Namespace Inactive
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Namespace set to inactive
+
+  /namespaces/{namespaceId}/projects:
+    post:
+      summary: Create a new Project within a Namespace
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Project created successfully
+
+    get:
+      summary: Get all Projects in one Namespace
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of all projects in the specified namespace
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
+
+
+  /namespaces/{namespaceId}/projects/{projectId}/prompts:
     post:
-      summary: Create Project
-      tags:
-        - Projects
+      summary: Create or update a Prompt in a Project
+      parameters:
+        - in: path
+          name: namespaceId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Project'
+              $ref: '#/components/schemas/PromptCreate'
       responses:
         '201':
-          description: Project created successfully
+          description: Prompt created or updated successfully
 
-  /projects/{projectId}:
     patch:
-      summary: Update Project
-      tags:
-        - Projects
+      summary: Set a Prompt Inactive
       parameters:
-        - name: projectId
-          in: path
+        - in: path
+          name: namespaceId
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Project'
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
-          description: Project updated successfully
+        '204':
+          description: Prompt set to inactive
 
-  /projects/{projectId}/prompts:
+  /prompts/search/namespace/{namespaceId}:
     post:
-      summary: Add a new prompt to a project
-      tags:
-        - Prompts
+      summary: Search all Prompts in one Namespace with search criteria
       parameters:
-        - name: projectId
-          in: path
+        - in: path
+          name: namespaceId
           required: true
           schema:
             type: string
@@ -73,23 +173,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Prompt'
-      responses:
-        '201':
-          description: Prompt added successfully
-    get:
-      summary: Get all prompts for a project
-      tags:
-        - Prompts
-      parameters:
-        - name: projectId
-          in: path
-          required: true
-          schema:
-            type: string
+              $ref: '#/components/schemas/PromptSearch'
       responses:
         '200':
-          description: A list of prompts for the specified project
+          description: List of prompts in the namespace matching search criteria
           content:
             application/json:
               schema:
@@ -97,57 +184,18 @@ paths:
                 items:
                   $ref: '#/components/schemas/Prompt'
 
-  /prompts/{promptId}:
-    get:
-      summary: Get a specific prompt by ID
-      tags:
-        - Prompts
-      parameters:
-        - name: promptId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: query
-          schema:
-            type: integer
-            description: Specific version of the prompt to retrieve. If not provided, the latest version will be returned.
-      responses:
-        '200':
-          description: Prompt details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Prompt'
-    patch:
-      summary: Update an existing prompt (creates a new version)
-      tags:
-        - Prompts
-      parameters:
-        - name: promptId
-          in: path
-          required: true
-          schema:
-            type: string
+  /prompts/search/all:
+    post:
+      summary: Search all Prompts in all Namespaces and Projects with search criteria
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Prompt'
+              $ref: '#/components/schemas/PromptSearch'
       responses:
         '200':
-          description: Prompt updated successfully, new version created
-
-  /prompts/global:
-    get:
-      summary: Get All Public Prompts
-      tags:
-        - Prompts
-      responses:
-        '200':
-          description: A list of all public prompts
+          description: List of all prompts matching search criteria
           content:
             application/json:
               schema:
@@ -155,90 +203,101 @@ paths:
                 items:
                   $ref: '#/components/schemas/Prompt'
 
-
-  /prompts/global/{promptId}:
-    get:
-      summary: Get a specific public prompt by ID
-      tags:
-        - Prompts
-      parameters:
-        - name: promptId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: version
-          in: query
-          schema:
-            type: integer
-            description: Specific version of the prompt to retrieve. If not provided, the latest version will be returned.
-      responses:
-        '200':
-          description: Prompt details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Prompt'
-                
 components:
   schemas:
+    NamespaceCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User-friendly name for the namespace
+
+    NamespaceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User-friendly name for the namespace
+
+    Namespace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    ProjectCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User-friendly name for the project
+
     Project:
       type: object
       properties:
         id:
           type: string
-          description: Unique identifier for the project
+        namespaceId:
+          type: string
         name:
           type: string
-          description: Name of the project
-        description:
-          type: string
-          description: Description of the project
-        createdAt:
-          type: string
-          format: date-time
-          description: Project creation timestamp
+
+
+    PromptCreate:
+      type: object
       required:
         - name
+        - content
+        - LLM
+      properties:
+        name:
+          type: string
+          description: User-friendly name for the prompt
+        content:
+          type: string
+          description: Actual prompt text
+        LLM:
+          type: string
+          description: LLM model name for which the prompt has been developed
+        isPublic:
+          type: boolean
+          description: Indicates if the prompt is public
 
     Prompt:
       type: object
       properties:
         id:
           type: string
-          description: Unique identifier for the prompt
         projectId:
           type: string
-          description: Identifier of the project this prompt belongs to
         name:
           type: string
-          description: Name of the prompt
         content:
           type: string
-          description: The text content of the prompt
-        temperature:
-          type: number
-          format: float
-          description: Temperature setting for the prompt
-        context:
+        LLM:
           type: string
-          description: Context information for the prompt
-        systemMessage:
-          type: string
-          description: Optional system message associated with the prompt
-        outputFormatting:
-          type: string
-          description: Desired output formatting for the prompt response
         version:
           type: integer
-          description: Version number of the prompt
         isPublic:
           type: boolean
-          description: Flag indicating if the prompt is public
-        createdAt:
+
+    PromptSearch:
+      type: object
+      properties:
+        LLM:
           type: string
-          format: date-time
-          description: Prompt creation timestamp
-      required:
-        - content
-        - projectId
+          description: Search by LLM model name
+        version:
+          type: integer
+          description: Search by version
+        isPublic:
+          type: boolean
+          description: Search by public visibility
+        namespaceID:
+          type: string
+          description: Search by Namecpace ID
+        projectID:
+          type: string
+          description: Search by Project ID
