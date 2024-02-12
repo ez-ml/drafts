@@ -1,0 +1,71 @@
+1. Objective
+The objective of the LLM Prompt Management Service is to provide a comprehensive solution for the creation, management, experimentation, and deployment of prompts used in language model (LLM) applications. This service aims to streamline the workflow for developers and researchers working with LLMs by offering a robust platform for prompt design, versioning, and publication, facilitating the rapid development and iteration of LLM prompts.
+
+2. Requirements
+User requirements for the LLM Prompt Management Service include:
+
+Ability to design prompt templates with placeholders for various elements.
+Capability to create, experiment with, and iterate on prompts based on templates.
+Version control for prompt templates and individual prompts.
+Mechanism to publish and manage the lifecycle of prompts.
+Functionality to search and discover prompt templates and published prompts.
+API and SDK access for integration with LLM workflows, particularly within the LangChainGo framework.
+Scalable and high-performing backend storage to manage prompt data.
+3. Features and Functionality
+The service will provide the following features and functionality:
+
+Prompt Template Design: Interface for creating and managing prompt templates with placeholders for elements like instructions, contexts, and examples.
+Prompt Experimentation: Tools for developing prompts from templates, including versioning and rollback capabilities.
+Prompt Publishing: A publication workflow for prompts, making them available for production use after testing and validation.
+Search and Discovery: Capabilities to search for templates and prompts based on various criteria.
+API and SDK: RESTful API and GoLang SDK for accessing the service programmatically, ensuring easy integration with LLM workflows.
+4. Design Choices
+LLM Frameworks:
+LangChainGo is preferred for its direct alignment with LLM workflows and its compatibility with GoLang, offering robust features for prompt management within LLM applications.
+Alternatives like Agency and Lingoose were considered but found to be less suited due to their primary focus areas outside of LLM prompt management.
+Databases:
+AWS DocumentDB is chosen for its MongoDB compatibility, offering a flexible schema ideal for the variable structures of prompts and templates.
+DataStax Managed Cassandra and DynamoDB were evaluated but deemed less optimal due to their data model complexities and cost-scaling concerns, respectively.
+5. Architecture
+The high-level architecture includes:
+
+Prompt Design and Management Module: For template creation and prompt experimentation.
+Prompt Publishing Module: To manage the publication lifecycle of prompts.
+API and SDK Module: Offering RESTful API endpoints and a GoLang SDK for service integration.
+Storage Layer: Utilizing AWS DocumentDB for data persistence.
+Caching Layer: Leveraging Elastic Cache for Redis to enhance performance for frequently accessed prompts.
+6. Design
+API Endpoints:
+CRUD operations for prompt templates (/prompt-templates) and prompts (/prompts).
+Endpoints for publishing (/prompts/{promptId}/publish) and consuming prompts (/prompts/{promptId}/consume).
+SDK Methods:
+Methods mirroring API functionality, such as CreatePromptTemplate(), UpdatePrompt(), PublishPrompt(), and ConsumePrompt().
+Database Design:
+DocumentDB Schema:
+
+json
+Copy code
+{
+  "PromptTemplate": {
+    "templateId": "string",
+    "placeholders": ["Instruction", "Context", "TaskContext", "TimeContext", "Examples"],
+    "metadata": {}
+  },
+  "Prompts": {
+    "promptId": "string",
+    "templateId": "string",
+    "elements": {
+      "Instruction": "string",
+      "Context": "string",
+      // Other elements...
+    },
+    "versions": [],
+    "status": "string",
+    "metadata": {}
+  }
+}
+7. Scalability and Performance
+The service architecture is designed for high availability, leveraging AWS EKS for deployment and scalability.
+Performance is enhanced through the use of Elastic Cache for Redis, caching frequently accessed prompts to reduce load times and database queries.
+8. Conclusion
+The LLM Prompt Management Service is designed to be a comprehensive platform for the development and deployment of LLM prompts, addressing the needs of developers and researchers in the field. By leveraging the LangChainGo framework and AWS technologies like DocumentDB and Elastic Cache, the service promises to offer a scalable, high-performing, and user-friendly solution for prompt management within LLM applications.
