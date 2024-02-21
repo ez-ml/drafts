@@ -69,3 +69,96 @@ The service architecture is designed for high availability, leveraging AWS EKS f
 Performance is enhanced through the use of Elastic Cache for Redis, caching frequently accessed prompts to reduce load times and database queries.
 8. Conclusion
 The LLM Prompt Management Service is designed to be a comprehensive platform for the development and deployment of LLM prompts, addressing the needs of developers and researchers in the field. By leveraging the LangChainGo framework and AWS technologies like DocumentDB and Elastic Cache, the service promises to offer a scalable, high-performing, and user-friendly solution for prompt management within LLM applications.
+
+
+
+
+----
+Evaluate the Database for storing the Prompts (March 1 - March 5)
+
+Research potential databases (March 1 - March 2)
+Evaluate performance, scalability, and cost (March 3 - March 5)
+Design DB Schemas (March 6 - March 10)
+
+Design the Prompt schema (March 6 - March 7)
+Design the Prompt Template schema (March 8)
+Design the Prompt Element schema (March 9 - March 10)
+Define Out of Box Prompts (March 11 - March 13)
+
+Identify MVP requirements (March 11)
+Draft initial set of Out of Box prompts (March 12 - March 13)
+Design the Prompt Assembler (March 14 - March 20)
+
+Architect the interaction with Search & Retrieval systems (March 14 - March 16)
+Prototype basic assembler functionalities (March 17 - March 20)
+Design API in GoLang (March 21 - March 26)
+
+Define API endpoints and contracts (March 21 - March 22)
+Implement API logic (March 23 - March 25)
+Initial API testing and documentation (March 26)
+Design the Versioning System (March 27 - March 29)
+
+Define versioning rules and logic (March 27)
+Implement versioning system in the database (March 28 - March 29)
+Infrastructure & CI/CD Pipeline (March 30 - April 3)
+
+Define infrastructure requirements (March 30)
+Setup cloud services and resources (March 31 - April 1)
+Configure CI/CD pipelines (April 2 - April 3)
+
+
+Additional Tasks and Buffer
+Integration Testing & Debugging (April 4 - April 5)
+
+Integrate components and conduct end-to-end testing (April 4)
+Debug issues and refine system (April 5)
+Documentation & Training (April 6)
+
+Finalize system documentation (April 6)
+Conduct initial team training sessions (April 6)
+Project Review & Adjustments (April 7)
+
+Review project outcomes against objectives (April 7)
+Plan for next phase or adjustments based on feedback (April 7)
+
+
+
+
+----
+
+
+
+Detailed Gantt Chart Table with Main and Sub Tasks
+Tasks / Weeks	W1 Mar 1-5	W2 Mar 6-10	W3 Mar 11-15	W4 Mar 16-20	W5 Mar 21-25	W6 Mar 26-30	W7 Mar 31-Apr 4	W8 Apr 5-7	W9 Buffer
+Evaluate Database for Prompts									
+Research potential databases	███								
+Evaluate performance, scalability	███								
+Design DB Schemas									
+Design the Prompt schema		███							
+Design the Prompt Template schema		█							
+Design the Prompt Element schema		███							
+Define Out of Box Prompts									
+Identify MVP requirements			█						
+Draft initial set of prompts			███						
+Design Prompt Assembler									
+Architect interaction with systems				███					
+Prototype assembler functionalities				███					
+Design API in GoLang									
+Define API endpoints and contracts					███				
+Implement API logic					███				
+API testing and documentation						█			
+Design Versioning System									
+Define versioning rules and logic						█			
+Implement versioning in database						███			
+Infrastructure & CI/CD Pipeline									
+Define infrastructure requirements							█		
+Setup cloud services and resources							███		
+Configure CI/CD pipelines							███		
+Integration Testing & Debugging									
+Integrate components and test								█	
+Debug issues and refine system								█	
+Documentation & Training									
+Finalize system documentation								█	
+Conduct initial team training								█	
+Project Review & Adjustments									
+Review project								
