@@ -1,60 +1,32 @@
 openapi: 3.0.0
 info:
-  title: Prompt Management System API
-  description: API for managing LLM prompts across different lines of business (Namespaces).
-  version: "1.0.0"
-
-servers:
-  - url: 'https://api.yourpromptsystem.com/v1'
-
+  title: LLM Prompt Template Management Service
+  version: 1.0.0
 paths:
-  /namespaces:
-    post:
-      summary: Create a new Namespace
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NamespaceCreate'
-      responses:
-        '201':
-          description: Namespace created successfully
-
+  /templates/{id}:
     get:
-      summary: Retrieve the list of all Namespaces
-      responses:
-        '200':
-          description: List of all namespaces
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Namespace'
-
-  /namespaces/{namespaceId}:
-    get:
-      summary: Get a Namespace by ID
+      summary: Get a template by its ID
+      operationId: getTemplateByID
       parameters:
-        - in: path
-          name: namespaceId
+        - name: id
+          in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Namespace details
+          description: Template retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Namespace'
+                $ref: '#/components/schemas/PromptTemplate'
 
     put:
-      summary: Update a Namespace
+      summary: Update an existing prompt template
+      operationId: updatePromptTemplate
       parameters:
-        - in: path
-          name: namespaceId
+        - name: id
+          in: path
           required: true
           schema:
             type: string
@@ -63,241 +35,154 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NamespaceUpdate'
+              $ref: '#/components/schemas/PromptTemplate'
       responses:
         '200':
-          description: Namespace updated successfully
+          description: Template updated successfully
 
-    patch:
-      summary: Set a Namespace Inactive
+    delete:
+      summary: Delete a prompt template
+      operationId: deletePromptTemplate
       parameters:
-        - in: path
-          name: namespaceId
+        - name: id
+          in: path
           required: true
           schema:
             type: string
       responses:
         '204':
-          description: Namespace set to inactive
+          description: Template deleted successfully
 
-  /namespaces/{namespaceId}/projects:
-    post:
-      summary: Create a new Project within a Namespace
+    patch:
+      summary: Deactivate a prompt template
+      operationId: deactivatePromptTemplate
       parameters:
-        - in: path
-          name: namespaceId
+        - name: id
+          in: path
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProjectCreate'
       responses:
-        '201':
-          description: Project created successfully
+        '200':
+          description: Template deactivated successfully
 
+  /templates/version/{version}:
     get:
-      summary: Get all Projects in one Namespace
+      summary: Get templates by version
+      operationId: getPromptTemplateByversion
       parameters:
-        - in: path
-          name: namespaceId
+        - name: version
+          in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: List of all projects in the specified namespace
+          description: Templates retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Project'
+                  $ref: '#/components/schemas/PromptTemplate'
 
-
-  /namespaces/{namespaceId}/projects/{projectId}/prompts:
-    post:
-      summary: Create or update a Prompt in a Project
+  /templates:
+    get:
+      summary: List prompt templates with filters
+      operationId: listPromptTemplates
       parameters:
-        - in: path
-          name: namespaceId
-          required: true
+        - name: status
+          in: query
+          schema:
+            type: boolean
+        - name: collection
+          in: query
           schema:
             type: string
-        - in: path
-          name: projectId
-          required: true
+        - name: rating
+          in: query
           schema:
             type: string
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Templates listed successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PromptTemplate'
+
+    post:
+      summary: Save a new prompt template
+      operationId: savePromptTemplate
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PromptCreate'
+              $ref: '#/components/schemas/PromptTemplate'
       responses:
         '201':
-          description: Prompt created or updated successfully
+          description: Template saved successfully
 
-    patch:
-      summary: Set a Prompt Inactive
+  /templates/collection/{collectionID}:
+    get:
+      summary: Get prompts by Collection ID
+      operationId: getPromptsByCollectionID
       parameters:
-        - in: path
-          name: namespaceId
+        - name: collectionID
+          in: path
           required: true
           schema:
             type: string
-        - in: path
-          name: projectId
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Prompt set to inactive
-
-  /prompts/search/namespace/{namespaceId}:
-    post:
-      summary: Search all Prompts in one Namespace with search criteria
-      parameters:
-        - in: path
-          name: namespaceId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PromptSearch'
       responses:
         '200':
-          description: List of prompts in the namespace matching search criteria
+          description: Templates retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Prompt'
-
-  /prompts/search/all:
-    post:
-      summary: Search all Prompts in all Namespaces and Projects with search criteria
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PromptSearch'
-      responses:
-        '200':
-          description: List of all prompts matching search criteria
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Prompt'
+                  $ref: '#/components/schemas/PromptTemplate'
 
 components:
   schemas:
-    NamespaceCreate:
-      type: object
-      properties:
-        name:
-          type: string
-          description: User-friendly name for the namespace
-
-    NamespaceUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-          description: User-friendly name for the namespace
-
-    Namespace:
+    PromptTemplate:
       type: object
       properties:
         id:
           type: string
-        name:
-          type: string
-
-    ProjectCreate:
-      type: object
-      properties:
-        name:
-          type: string
-          description: User-friendly name for the project
-
-    Project:
-      type: object
-      properties:
-        id:
-          type: string
-        namespaceId:
-          type: string
-        name:
-          type: string
-
-
-    PromptCreate:
-      type: object
-      required:
-        - name
-        - content
-        - LLM
-      properties:
-        name:
-          type: string
-          description: User-friendly name for the prompt
-        content:
-          type: string
-          description: Actual prompt text
-        LLM:
-          type: string
-          description: LLM model name for which the prompt has been developed
-        isPublic:
-          type: boolean
-          description: Indicates if the prompt is public
-
-    Prompt:
-      type: object
-      properties:
-        id:
-          type: string
-        projectId:
-          type: string
-        name:
-          type: string
-        content:
-          type: string
-        LLM:
+        collectionID:
           type: string
         version:
-          type: integer
-        isPublic:
+          type: string
+        status:
           type: boolean
-
-    PromptSearch:
-      type: object
-      properties:
-        LLM:
+        tags:
+          type: array
+          items:
+            type: string
+        rating:
           type: string
-          description: Search by LLM model name
-        version:
-          type: integer
-          description: Search by version
-        isPublic:
-          type: boolean
-          description: Search by public visibility
-        namespaceID:
+        llm:
           type: string
-          description: Search by Namecpace ID
-        projectID:
+        template:
           type: string
-          description: Search by Project ID
+        metadata:
+          type: object
+          properties:
+            createdAt:
+              type: string
+            modifiedAt:
+              type: string
+            author:
+              type: string
+            usageCount:
+              type: integer
