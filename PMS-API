@@ -21,51 +21,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/PromptTemplate'
 
-    put:
-      summary: Update an existing prompt template
-      operationId: updatePromptTemplate
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PromptTemplate'
-      responses:
-        '200':
-          description: Template updated successfully
-
-    delete:
-      summary: Delete a prompt template
-      operationId: deletePromptTemplate
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Template deleted successfully
-
-    patch:
-      summary: Deactivate a prompt template
-      operationId: deactivatePromptTemplate
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Template deactivated successfully
-
   /templates/version/{version}:
     get:
       summary: Get templates by version
@@ -86,16 +41,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/PromptTemplate'
 
-  /templates:
+  /templates/search:
     get:
-      summary: List prompt templates with filters
-      operationId: listPromptTemplates
+      summary: Search prompt templates with filters
+      operationId: getPromptTemplate
       parameters:
         - name: status
           in: query
           schema:
             type: boolean
-        - name: collection
+        - name: collectionID
           in: query
           schema:
             type: string
@@ -109,28 +64,19 @@ paths:
             type: array
             items:
               type: string
+        - name: llm
+          in: query
+          schema:
+            type: string
       responses:
         '200':
-          description: Templates listed successfully
+          description: Templates retrieved successfully based on filters
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PromptTemplate'
-
-    post:
-      summary: Save a new prompt template
-      operationId: savePromptTemplate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PromptTemplate'
-      responses:
-        '201':
-          description: Template saved successfully
 
   /templates/collection/{collectionID}:
     get:
@@ -151,6 +97,68 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PromptTemplate'
+
+  /templates:
+    post:
+      summary: Save a new prompt template
+      operationId: savePromptTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromptTemplate'
+      responses:
+        '201':
+          description: Template saved successfully
+
+  /templates/{id}:
+    put:
+      summary: Update an existing prompt template
+      operationId: updatePromptTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromptTemplate'
+      responses:
+        '200':
+          description: Template updated successfully
+
+  /templates/{id}/deactivate:
+    patch:
+      summary: Deactivate a prompt template
+      operationId: deactivatePromptTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Template deactivated successfully
+
+  /templates/{id}:
+    delete:
+      summary: Delete a prompt template
+      operationId: deletePromptTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Template deleted successfully
 
 components:
   schemas:
