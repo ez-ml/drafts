@@ -1,0 +1,163 @@
+Detailed Design Document for Memory as a Service Using EKS, DynamoDB, and GoLang
+Table of Contents
+Introduction
+Architecture
+Overview
+Components
+Design Diagram
+DynamoDB Schema
+Service Interfaces
+API Endpoints
+Data Flow
+Deployment and Packaging
+Infrastructure Setup
+Deployment Steps
+Packaging Strategy
+Namespace Configuration
+Security and Compliance
+Monitoring and Logging
+Scalability and Performance
+1. Introduction
+This document outlines the design and implementation of a Memory as a Service for consumer applications, specifically LLM workflows on LangChain and LangGraph, running in AWS EKS. The service, implemented in GoLang, will be storage-agnostic, initially using DynamoDB but extendable to other databases. It includes a client SDK in Python for consumer applications to interact with the service.
+
+2. Architecture
+Overview
+The architecture comprises the Memory Service, a client SDK, and a managed DynamoDB for storage. Each instance of the service deployed in a namespace will have its DynamoDB table, distinguished by a namespace prefix.
+
+Components
+EKS Cluster: Hosts the Memory Service and consumer applications.
+Namespaces: Separate environments for different instances of the service.
+AWS ACK Controllers: Manage DynamoDB resources.
+Memory Service: API service in GoLang that interacts with DynamoDB.
+Client SDK: Python SDK for consumer applications to interact with the Memory Service.
+Design Diagram
+mermaid
+Copy code
+graph TD;
+    subgraph EKS Cluster
+    subgraph Namespace_A [Namespace A]
+    Consumer_App_A
+    Memory_Service_A
+    end
+    subgraph Namespace_B [Namespace B]
+    Consumer_App_B
+    Memory_Service_B
+    end
+    end
+    Consumer_App_A -->|API Calls| Memory_Service_A
+    Consumer_App_B -->|API Calls| Memory_Service_B
+    Memory_Service_A -->|ACK Controller| DynamoDB_A
+    Memory_Service_B -->|ACK Controller| DynamoDB_B
+    subgraph AWS Cloud
+    DynamoDB_A
+    DynamoDB_B
+    end
+3. DynamoDB Schema
+The DynamoDB table is designed to store conversation buffers and summaries in sessions. The primary key is a composite key consisting of Namespace, UserID, and SessionID.
+
+Table: Conversations
+Attribute Name	Type	Description
+Namespace	String (PK)	Namespace prefix to distinguish tables
+UserID	String (SK)	Unique identifier for the user
+SessionID	String (SK)	Unique identifier for the session
+Conversation	String	The conversation data
+Summary	String	Summary of the conversation
+ExpirationTime	Number	TTL attribute for automatic expiration
+Example Item
+json
+Copy code
+{
+  "Namespace": "namespaceA",
+  "UserID": "user123",
+  "SessionID": "session456",
+  "Conversation": "Hello, how can I help you today?",
+  "Summary": "User asked for help.",
+  "ExpirationTime": 172800
+}
+4. Service Interfaces
+API Endpoints
+Memory Service API
+
+GET /memory/{Namespace}/{UserID}/{SessionID}: Retrieve a specific session for a user within a namespace.
+POST /memory: Create a new session.
+PUT /memory/{Namespace}/{UserID}/{SessionID}: Update a specific session with the latest conversation and summary.
+DELETE /memory/{Namespace}/{UserID}/{SessionID}: Delete a specific session.
+Data Flow
+Initializing a Session:
+The SDK sends a GET /memory/{Namespace}/{UserID}/{SessionID} request to check if a session exists in DynamoDB.
+Creating a Session:
+The SDK sends a POST /memory request to create a new session if it doesn't exist.
+Updating a Session:
+The SDK sends a PUT /memory/{Namespace}/{UserID}/{SessionID} request to update the session with the latest conversation and summary.
+5. Deployment and Packaging
+Infrastructure Setup
+Create EKS Cluster: Set up the EKS cluster using eksctl or AWS Management Console.
+Install ACK Controllers:
+Download and install ACK controllers for DynamoDB.
+Deployment Steps
+Create Namespaces:
+
+Create separate namespaces for each LOB in the EKS cluster.
+sh
+Copy code
+kubectl create namespace lob-a
+kubectl create namespace lob-b
+Deploy ACK Controllers:
+
+Apply the CRDs and controller manifests for DynamoDB within each namespace.
+Create IAM Roles:
+
+Create IAM roles for the ACK controllers and associate them with the service accounts within each namespace.
+Deploy Memory Service:
+
+Build Docker images for the Memory Service.
+Create Kubernetes deployments and services for the Memory APIs within each namespace.
+Deploy Client SDK:
+
+Package the Python SDK as a PIP package and publish it to PyPI for easy installation.
+Packaging Strategy
+Use Docker for containerizing the Memory Service.
+Use Helm charts for deploying the services on EKS, with Helm values files customized for each namespace.
+Namespace Configuration
+Each namespace will have its Memory Service deployment and associated DynamoDB table. The table names will have the namespace prefix appended to distinguish between different tables.
+
+6. Security and Compliance
+IAM Roles and Policies: Ensure that roles and policies follow the principle of least privilege.
+Encryption: Enable encryption at rest and in transit for DynamoDB.
+Access Control: Use Kubernetes RBAC to restrict access to services.
+Namespace Isolation: Ensure strict isolation between namespaces for different LOBs.
+Partitioning Data: Ensure data is partitioned by namespace in DynamoDB for isolation.
+7. Monitoring and Logging
+AWS CloudWatch: Use CloudWatch for monitoring DynamoDB.
+Prometheus and Grafana: Set up for monitoring the EKS cluster and services.
+ELK Stack: Use Elasticsearch, Logstash, and Kibana for logging.
+8. Scalability and Performance
+Auto-scaling: Configure auto-scaling for EKS nodes.
+Read/Write Capacity: Adjust DynamoDB's read/write capacity based on workload.
+Caching Strategies: Consider using a caching layer (e.g., Redis) to improve performance if needed.
+Partitioning: Utilize partition keys in DynamoDB to distribute load evenly across namespaces.
+Design Diagram
+Here is a more detailed design diagram representing the architecture and data flow:
+
+mermaid
+Copy code
+graph TD;
+    subgraph EKS Cluster
+    subgraph Namespace_A [Namespace A]
+    Consumer_App_A
+    Memory_Service_A
+    end
+    subgraph Namespace_B [Namespace B]
+    Consumer_App_B
+    Memory_Service_B
+    end
+    end
+    Consumer_App_A -->|API Calls| Memory_Service_A
+    Consumer_App_B -->|API Calls| Memory_Service_B
+    Memory_Service_A -->|ACK Controller| DynamoDB_A
+    Memory_Service_B -->|ACK Controller| DynamoDB_B
+    subgraph AWS Cloud
+    DynamoDB_A
+    DynamoDB_B
+    end
+This detailed design document provides a comprehensive guide to building Memory as a Service for a RAG workflow using AWS services managed by ACK controllers on an EKS cluster, with dedicated namespaces and partitioning for each Line of Business.
