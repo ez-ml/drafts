@@ -1,163 +1,242 @@
-Detailed Design Document for Memory as a Service Using EKS, DynamoDB, and GoLang
-Table of Contents
-Introduction
-Architecture
-Overview
-Components
-Design Diagram
-DynamoDB Schema
-Service Interfaces
-API Endpoints
-Data Flow
-Deployment and Packaging
-Infrastructure Setup
-Deployment Steps
-Packaging Strategy
-Namespace Configuration
-Security and Compliance
-Monitoring and Logging
-Scalability and Performance
-1. Introduction
-This document outlines the design and implementation of a Memory as a Service for consumer applications, specifically LLM workflows on LangChain and LangGraph, running in AWS EKS. The service, implemented in GoLang, will be storage-agnostic, initially using DynamoDB but extendable to other databases. It includes a client SDK in Python for consumer applications to interact with the service.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory as a Service Design Document</title>
+</head>
+<body>
+    <h1>Design Document: Memory as a Service for Customer Support Chatbots</h1>
 
-2. Architecture
-Overview
-The architecture comprises the Memory Service, a client SDK, and a managed DynamoDB for storage. Each instance of the service deployed in a namespace will have its DynamoDB table, distinguished by a namespace prefix.
+    <h2>Overview</h2>
+    <p>This document outlines the design for developing "Memory as a Service" (MaaS) for customer support chatbots, implemented in GoLang and leveraging DynamoDB as the backend. The service will cater to various memory requirements, such as chat message history, conversation summaries, knowledge graphs, token buffers, agent states, and entity memory. A Python client SDK will be provided for easy integration with consumer applications.</p>
 
-Components
-EKS Cluster: Hosts the Memory Service and consumer applications.
-Namespaces: Separate environments for different instances of the service.
-AWS ACK Controllers: Manage DynamoDB resources.
-Memory Service: API service in GoLang that interacts with DynamoDB.
-Client SDK: Python SDK for consumer applications to interact with the Memory Service.
-Design Diagram
-mermaid
-Copy code
-graph TD;
-    subgraph EKS Cluster
-    subgraph Namespace_A [Namespace A]
-    Consumer_App_A
-    Memory_Service_A
-    end
-    subgraph Namespace_B [Namespace B]
-    Consumer_App_B
-    Memory_Service_B
-    end
-    end
-    Consumer_App_A -->|API Calls| Memory_Service_A
-    Consumer_App_B -->|API Calls| Memory_Service_B
-    Memory_Service_A -->|ACK Controller| DynamoDB_A
-    Memory_Service_B -->|ACK Controller| DynamoDB_B
-    subgraph AWS Cloud
-    DynamoDB_A
-    DynamoDB_B
-    end
-3. DynamoDB Schema
-The DynamoDB table is designed to store conversation buffers and summaries in sessions. The primary key is a composite key consisting of Namespace, UserID, and SessionID.
+    <h2>1. DynamoDB Schemas</h2>
 
-Table: Conversations
-Attribute Name	Type	Description
-Namespace	String (PK)	Namespace prefix to distinguish tables
-UserID	String (SK)	Unique identifier for the user
-SessionID	String (SK)	Unique identifier for the session
-Conversation	String	The conversation data
-Summary	String	Summary of the conversation
-ExpirationTime	Number	TTL attribute for automatic expiration
-Example Item
-json
-Copy code
-{
-  "Namespace": "namespaceA",
-  "UserID": "user123",
-  "SessionID": "session456",
-  "Conversation": "Hello, how can I help you today?",
-  "Summary": "User asked for help.",
-  "ExpirationTime": 172800
-}
-4. Service Interfaces
-API Endpoints
-Memory Service API
+    <h3>Table Structure</h3>
+    <ul>
+        <li><strong>Table Name:</strong> &lt;namespace&gt;_sessions</li>
+        <li><strong>Partition Key:</strong> session_id (string) - Unique identifier for each session.</li>
+        <li><strong>Sort Key:</strong> item_type#timestamp (string) - Combination of item type and timestamp to distinguish between different types of data.</li>
+    </ul>
 
-GET /memory/{Namespace}/{UserID}/{SessionID}: Retrieve a specific session for a user within a namespace.
-POST /memory: Create a new session.
-PUT /memory/{Namespace}/{UserID}/{SessionID}: Update a specific session with the latest conversation and summary.
-DELETE /memory/{Namespace}/{UserID}/{SessionID}: Delete a specific session.
-Data Flow
-Initializing a Session:
-The SDK sends a GET /memory/{Namespace}/{UserID}/{SessionID} request to check if a session exists in DynamoDB.
-Creating a Session:
-The SDK sends a POST /memory request to create a new session if it doesn't exist.
-Updating a Session:
-The SDK sends a PUT /memory/{Namespace}/{UserID}/{SessionID} request to update the session with the latest conversation and summary.
-5. Deployment and Packaging
-Infrastructure Setup
-Create EKS Cluster: Set up the EKS cluster using eksctl or AWS Management Console.
-Install ACK Controllers:
-Download and install ACK controllers for DynamoDB.
-Deployment Steps
-Create Namespaces:
+    <h3>Attributes:</h3>
+    <ul>
+        <li>session_id (string) - Unique identifier for each session.</li>
+        <li>item_type (string) - Type of the item (e.g., message, summary, knowledge_graph, token_buffer, agent_state, entity).</li>
+        <li>timestamp (number) - Timestamp of the item.</li>
+        <li>data (string) - JSON string containing the actual data.</li>
+        <li>ttl (number) - Time-to-live attribute for automatic expiration.</li>
+    </ul>
 
-Create separate namespaces for each LOB in the EKS cluster.
-sh
-Copy code
-kubectl create namespace lob-a
-kubectl create namespace lob-b
-Deploy ACK Controllers:
+    <h3>Example Schema</h3>
+    <pre><code>{
+  "TableName": "&lt;namespace&gt;_sessions",
+  "KeySchema": [
+    { "AttributeName": "session_id", "KeyType": "HASH" },
+    { "AttributeName": "item_type#timestamp", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "session_id", "AttributeType": "S" },
+    { "AttributeName": "item_type#timestamp", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "TimeToLiveSpecification": {
+    "Enabled": true,
+    "AttributeName": "ttl"
+  }
+}</code></pre>
 
-Apply the CRDs and controller manifests for DynamoDB within each namespace.
-Create IAM Roles:
+    <h3>Example Data Items</h3>
+    <h4>Chat Message History:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "message#1617171717",
+  "data": "{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+  "ttl": 1619773717
+}</code></pre>
 
-Create IAM roles for the ACK controllers and associate them with the service accounts within each namespace.
-Deploy Memory Service:
+    <h4>Conversation Summary:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "summary#1617171717",
+  "data": "{\"summary\":\"The user inquired about product details.\"}",
+  "ttl": 1619773717
+}</code></pre>
 
-Build Docker images for the Memory Service.
-Create Kubernetes deployments and services for the Memory APIs within each namespace.
-Deploy Client SDK:
+    <h4>Knowledge Graph Memory:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "knowledge_graph#1617171717",
+  "data": "{\"graph\":\"{nodes: [], edges: []}\"}",
+  "ttl": 1619773717
+}</code></pre>
 
-Package the Python SDK as a PIP package and publish it to PyPI for easy installation.
-Packaging Strategy
-Use Docker for containerizing the Memory Service.
-Use Helm charts for deploying the services on EKS, with Helm values files customized for each namespace.
-Namespace Configuration
-Each namespace will have its Memory Service deployment and associated DynamoDB table. The table names will have the namespace prefix appended to distinguish between different tables.
+    <h4>Conversation Token Buffer:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "token_buffer#1617171717",
+  "data": "{\"tokens\":[\"token1\", \"token2\"]}",
+  "ttl": 1619773717
+}</code></pre>
 
-6. Security and Compliance
-IAM Roles and Policies: Ensure that roles and policies follow the principle of least privilege.
-Encryption: Enable encryption at rest and in transit for DynamoDB.
-Access Control: Use Kubernetes RBAC to restrict access to services.
-Namespace Isolation: Ensure strict isolation between namespaces for different LOBs.
-Partitioning Data: Ensure data is partitioned by namespace in DynamoDB for isolation.
-7. Monitoring and Logging
-AWS CloudWatch: Use CloudWatch for monitoring DynamoDB.
-Prometheus and Grafana: Set up for monitoring the EKS cluster and services.
-ELK Stack: Use Elasticsearch, Logstash, and Kibana for logging.
-8. Scalability and Performance
-Auto-scaling: Configure auto-scaling for EKS nodes.
-Read/Write Capacity: Adjust DynamoDB's read/write capacity based on workload.
-Caching Strategies: Consider using a caching layer (e.g., Redis) to improve performance if needed.
-Partitioning: Utilize partition keys in DynamoDB to distribute load evenly across namespaces.
-Design Diagram
-Here is a more detailed design diagram representing the architecture and data flow:
+    <h4>Agent State:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "agent_state#1617171717",
+  "data": "{\"state\":\"active\"}",
+  "ttl": 1619773717
+}</code></pre>
 
-mermaid
-Copy code
-graph TD;
-    subgraph EKS Cluster
-    subgraph Namespace_A [Namespace A]
-    Consumer_App_A
-    Memory_Service_A
-    end
-    subgraph Namespace_B [Namespace B]
-    Consumer_App_B
-    Memory_Service_B
-    end
-    end
-    Consumer_App_A -->|API Calls| Memory_Service_A
-    Consumer_App_B -->|API Calls| Memory_Service_B
-    Memory_Service_A -->|ACK Controller| DynamoDB_A
-    Memory_Service_B -->|ACK Controller| DynamoDB_B
-    subgraph AWS Cloud
-    DynamoDB_A
-    DynamoDB_B
-    end
-This detailed design document provides a comprehensive guide to building Memory as a Service for a RAG workflow using AWS services managed by ACK controllers on an EKS cluster, with dedicated namespaces and partitioning for each Line of Business.
+    <h4>Entity Memory:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "entity#1617171717",
+  "data": "{\"entity_id\":\"entity1\",\"attributes\":{\"attr1\":\"value1\"}}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h2>2. High-Level Architecture</h2>
+    <!-- You can include an image by replacing the src with the actual image URL -->
+    <img src="https://example.com/high-level-architecture.png" alt="High-Level Architecture">
+
+    <h3>Components:</h3>
+    <ul>
+        <li><strong>Memory Service (GoLang):</strong> Manages memory operations.</li>
+        <li><strong>Client SDK (Python):</strong> Provides an interface for consumer applications.</li>
+        <li><strong>DynamoDB:</strong> Stores memory data.</li>
+        <li><strong>AWS EKS Cluster:</strong> Hosts the memory service.</li>
+    </ul>
+
+    <h3>Data Flow:</h3>
+    <p>User interacts with the chatbot. The chatbot core processes the input and interacts with the memory service via the SDK. The memory service fetches and updates data in DynamoDB. The response is generated and sent back to the user.</p>
+
+    <h2>3. API Endpoints</h2>
+
+    <h3>API Specification:</h3>
+    <h4>POST /session/init</h4>
+    <p>Initialize a session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345"
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success",
+  "data": {
+    "session_id": "12345",
+    "items": [ /* existing items */ ]
+  }
+}</code></pre>
+
+    <h4>POST /session/create</h4>
+    <p>Create a new session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345",
+  "user_id": "user1",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success",
+  "session_id": "12345"
+}</code></pre>
+
+    <h4>PUT /session/update</h4>
+    <p>Update an existing session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type": "message",
+  "timestamp": 1617171717,
+  "data": "{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success"
+}</code></pre>
+
+    <h2>4. Client SDK Functions</h2>
+
+    <h3>SDK Implementation:</h3>
+    <pre><code>import requests
+
+class MemoryClient:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    def init_session(self, session_id):
+        response = requests.post(f"{self.base_url}/session/init", json={"session_id": session_id})
+        return response.json()
+
+    def create_session(self, session_id, user_id, ttl):
+        response = requests.post(f"{self.base_url}/session/create", json={"session_id": session_id, "user_id": user_id, "ttl": ttl})
+        return response.json()
+
+    def update_session(self, session_id, item_type, timestamp, data, ttl):
+        payload = {
+            "session_id": session_id,
+            "item_type": item_type,
+            "timestamp": timestamp,
+            "data": data,
+            "ttl": ttl
+        }
+        response = requests.put(f"{self.base_url}/session/update", json=payload)
+        return response.json()</code></pre>
+
+    <h3>SDK Functions:</h3>
+
+    <h4>Initialize Session</h4>
+    <pre><code>def init_session(self, session_id):
+    response = requests.post(f"{self.base_url}/session/init", json={"session_id": session_id})
+    return response.json()</code></pre>
+
+    <h4>Create Session</h4>
+    <pre><code>def create_session(self, session_id, user_id, ttl):
+    response = requests.post(f"{self.base_url}/session/create", json={"session_id": session_id, "user_id": user_id, "ttl": ttl})
+    return response.json()</code></pre>
+
+    <h4>Update Session</h4>
+    <pre><code>def update_session(self, session_id, item_type, timestamp, data, ttl):
+    payload = {
+        "session_id": session_id,
+        "item_type": item_type,
+        "timestamp": timestamp,
+        "data": data,
+        "ttl": ttl
+    }
+    response = requests.put(f"{self.base_url}/session/update", json=payload)
+    return response.json()</code></pre>
+
+    <h3>Usage Example</h3>
+    <pre><code>from memory_client import MemoryClient
+
+client = MemoryClient(base_url="http://memory-service")
+
+# Initialize session
+init_response = client.init_session(session_id="12345")
+
+# Create session
+create_response = client.create_session(session_id="12345", user_id="user1", ttl=1619773717)
+
+# Update session
+update_response = client.update_session(
+    session_id="12345",
+    item_type="message",
+    timestamp=1617171717,
+    data="{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+    ttl=1619773717
+)</code></pre>
+
+    <h2>Conclusion</h2>
+    <p>This design document outlines the architecture, DynamoDB schema, API endpoints, and client SDK for building a Memory as a Service solution for customer support chatbots. The service is implemented in GoLang with DynamoDB as the backend, providing flexible memory management capabilities for various types of data. The Python SDK allows easy integration with consumer applications, ensuring seamless memory operations.</p>
+</body>
+</html>
