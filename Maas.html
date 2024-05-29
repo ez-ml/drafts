@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory as a Service Design Document</title>
+</head>
+<body>
+    <h1>Design Document: Memory as a Service for Customer Support Chatbots</h1>
+
+    <h2>Overview</h2>
+    <p>This document outlines the design for developing "Memory as a Service" (MaaS) for customer support chatbots, implemented in GoLang and leveraging DynamoDB as the backend. The service will cater to various memory requirements, such as chat message history, conversation summaries, knowledge graphs, token buffers, agent states, and entity memory. A Python client SDK will be provided for easy integration with consumer applications.</p>
+
+    <h2>1. DynamoDB Schemas</h2>
+
+    <h3>Table Structure</h3>
+    <ul>
+        <li><strong>Table Name:</strong> &lt;namespace&gt;_sessions</li>
+        <li><strong>Partition Key:</strong> session_id (string) - Unique identifier for each session.</li>
+        <li><strong>Sort Key:</strong> item_type#timestamp (string) - Combination of item type and timestamp to distinguish between different types of data.</li>
+    </ul>
+
+    <h3>Attributes:</h3>
+    <ul>
+        <li>session_id (string) - Unique identifier for each session.</li>
+        <li>item_type (string) - Type of the item (e.g., message, summary, knowledge_graph, token_buffer, agent_state, entity).</li>
+        <li>timestamp (number) - Timestamp of the item.</li>
+        <li>data (string) - JSON string containing the actual data.</li>
+        <li>ttl (number) - Time-to-live attribute for automatic expiration.</li>
+    </ul>
+
+    <h3>Example Schema</h3>
+    <pre><code>{
+  "TableName": "&lt;namespace&gt;_sessions",
+  "KeySchema": [
+    { "AttributeName": "session_id", "KeyType": "HASH" },
+    { "AttributeName": "item_type#timestamp", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "session_id", "AttributeType": "S" },
+    { "AttributeName": "item_type#timestamp", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "TimeToLiveSpecification": {
+    "Enabled": true,
+    "AttributeName": "ttl"
+  }
+}</code></pre>
+
+    <h3>Example Data Items</h3>
+    <h4>Chat Message History:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "message#1617171717",
+  "data": "{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h4>Conversation Summary:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "summary#1617171717",
+  "data": "{\"summary\":\"The user inquired about product details.\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h4>Knowledge Graph Memory:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "knowledge_graph#1617171717",
+  "data": "{\"graph\":\"{nodes: [], edges: []}\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h4>Conversation Token Buffer:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "token_buffer#1617171717",
+  "data": "{\"tokens\":[\"token1\", \"token2\"]}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h4>Agent State:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "agent_state#1617171717",
+  "data": "{\"state\":\"active\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h4>Entity Memory:</h4>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type#timestamp": "entity#1617171717",
+  "data": "{\"entity_id\":\"entity1\",\"attributes\":{\"attr1\":\"value1\"}}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h2>2. High-Level Architecture</h2>
+    <!-- You can include an image by replacing the src with the actual image URL -->
+    <img src="https://example.com/high-level-architecture.png" alt="High-Level Architecture">
+
+    <h3>Components:</h3>
+    <ul>
+        <li><strong>Memory Service (GoLang):</strong> Manages memory operations.</li>
+        <li><strong>Client SDK (Python):</strong> Provides an interface for consumer applications.</li>
+        <li><strong>DynamoDB:</strong> Stores memory data.</li>
+        <li><strong>AWS EKS Cluster:</strong> Hosts the memory service.</li>
+    </ul>
+
+    <h3>Data Flow:</h3>
+    <p>User interacts with the chatbot. The chatbot core processes the input and interacts with the memory service via the SDK. The memory service fetches and updates data in DynamoDB. The response is generated and sent back to the user.</p>
+
+    <h2>3. API Endpoints</h2>
+
+    <h3>API Specification:</h3>
+    <h4>POST /session/init</h4>
+    <p>Initialize a session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345"
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success",
+  "data": {
+    "session_id": "12345",
+    "items": [ /* existing items */ ]
+  }
+}</code></pre>
+
+    <h4>POST /session/create</h4>
+    <p>Create a new session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345",
+  "user_id": "user1",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success",
+  "session_id": "12345"
+}</code></pre>
+
+    <h4>PUT /session/update</h4>
+    <p>Update an existing session.</p>
+    <h5>Request Body:</h5>
+    <pre><code>{
+  "session_id": "12345",
+  "item_type": "message",
+  "timestamp": 1617171717,
+  "data": "{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+  "ttl": 1619773717
+}</code></pre>
+
+    <h5>Response:</h5>
+    <pre><code>{
+  "status": "success"
+}</code></pre>
+
+    <h2>4. Client SDK Functions</h2>
+
+    <h3>SDK Implementation:</h3>
+    <pre><code>import requests
+
+class MemoryClient:
+    def __init__(self, base_url):
+        self.base_url = base_url
+
+    def init_session(self, session_id):
+        response = requests.post(f"{self.base_url}/session/init", json={"session_id": session_id})
+        return response.json()
+
+    def create_session(self, session_id, user_id, ttl):
+        response = requests.post(f"{self.base_url}/session/create", json={"session_id": session_id, "user_id": user_id, "ttl": ttl})
+        return response.json()
+
+    def update_session(self, session_id, item_type, timestamp, data, ttl):
+        payload = {
+            "session_id": session_id,
+            "item_type": item_type,
+            "timestamp": timestamp,
+            "data": data,
+            "ttl": ttl
+        }
+        response = requests.put(f"{self.base_url}/session/update", json=payload)
+        return response.json()</code></pre>
+
+    <h3>SDK Functions:</h3>
+
+    <h4>Initialize Session</h4>
+    <pre><code>def init_session(self, session_id):
+    response = requests.post(f"{self.base_url}/session/init", json={"session_id": session_id})
+    return response.json()</code></pre>
+
+    <h4>Create Session</h4>
+    <pre><code>def create_session(self, session_id, user_id, ttl):
+    response = requests.post(f"{self.base_url}/session/create", json={"session_id": session_id, "user_id": user_id, "ttl": ttl})
+    return response.json()</code></pre>
+
+    <h4>Update Session</h4>
+    <pre><code>def update_session(self, session_id, item_type, timestamp, data, ttl):
+    payload = {
+        "session_id": session_id,
+        "item_type": item_type,
+        "timestamp": timestamp,
+        "data": data,
+        "ttl": ttl
+    }
+    response = requests.put(f"{self.base_url}/session/update", json=payload)
+    return response.json()</code></pre>
+
+    <h3>Usage Example</h3>
+    <pre><code>from memory_client import MemoryClient
+
+client = MemoryClient(base_url="http://memory-service")
+
+# Initialize session
+init_response = client.init_session(session_id="12345")
+
+# Create session
+create_response = client.create_session(session_id="12345", user_id="user1", ttl=1619773717)
+
+# Update session
+update_response = client.update_session(
+    session_id="12345",
+    item_type="message",
+    timestamp=1617171717,
+    data="{\"user_id\":\"user1\",\"message\":\"Hello, how can I help you?\"}",
+    ttl=1619773717
+)</code></pre>
+
+    <h2>Conclusion</h2>
+    <p>This design document outlines the architecture, DynamoDB schema, API endpoints, and client SDK for building a Memory as a Service solution for customer support chatbots. The service is implemented in GoLang with DynamoDB as the backend, providing flexible memory management capabilities for various types of data. The Python SDK allows easy integration with consumer applications, ensuring seamless memory operations.</p>
+</body>
+</html>
