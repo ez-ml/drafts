@@ -59,4 +59,60 @@ SDK Functions
     def get_last_k_system_responses
     def get_summary
     def get_knowledge_graph
+====
+
+[
+  {
+    "SessionID": "session1",
+    "Timestamp": 1622548800,
+    "MessageType": "UserQuestion",
+    "MessageContent": "What is the weather like today?",
+    "UserID": "user1",
+    "AIResponseID": "response1"
+  },
+  {
+    "SessionID": "session1",
+    "Timestamp": 1622548810,
+    "MessageType": "AIResponse",
+    "MessageContent": "The weather is sunny with a high of 75 degrees.",
+    "UserID": "user1",
+    "AIResponseID": "response1"
+  },
+  {
+    "SessionID": "session1",
+    "Timestamp": 1622548820,
+    "MessageType": "UserQuestion",
+    "MessageContent": "Will it rain tomorrow?",
+    "UserID": "user1",
+    "AIResponseID": "response2"
+  },
+  {
+    "SessionID": "session1",
+    "Timestamp": 1622548830,
+    "MessageType": "AIResponse",
+    "MessageContent": "No, it will not rain tomorrow.",
+    "UserID": "user1",
+    "AIResponseID": "response2"
+  },
+  {
+    "SessionID": "session2",
+    "Timestamp": 1622635200,
+    "MessageType": "UserQuestion",
+    "MessageContent": "What is the capital of France?",
+    "UserID": "user2",
+    "AIResponseID": "response3"
+  },
+  {
+    "SessionID": "session2",
+    "Timestamp": 1622635210,
+    "MessageType": "AIResponse",
+    "MessageContent": "The capital of France is Paris.",
+    "UserID": "user2",
+    "AIResponseID": "response3"
+  }
+]
+
+SELECT * FROM ChatHistory WHERE SessionID = 'session1'
+SELECT * FROM ChatHistory.SessionID-MessageType-Index WHERE SessionID = 'session1' AND MessageType = 'UserQuestion'
+SELECT * FROM ChatHistory.UserID-Timestamp-Index WHERE UserID = 'user1' AND Timestamp BETWEEN 1593600000 AND 1625133600
 
