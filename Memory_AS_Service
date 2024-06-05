@@ -112,6 +112,49 @@ SDK Functions
   }
 ]
 
+
+
+---
+
+Problem Statement
+The advent of conversational AI has revolutionized customer support by enabling automated, efficient, and scalable interaction with customers. However, building a robust and effective conversational chatbot for customer support presents several challenges, especially when dealing with complex, multi-turn, and multi-pass conversations. The critical components necessary for such a system include capturing conversation history, generating summaries, maintaining knowledge graphs, tracking agent workflow states, and managing a semantic cache with vector representations. These components must work together seamlessly to support real-time, low-latency interactions and ensure accurate and contextually relevant responses.
+
+Key Challenges
+Conversation History Management:
+
+Problem: Efficiently capturing and storing the conversation history for each session is crucial for maintaining context in multi-turn conversations.
+Requirement: The system must support low-latency retrieval of conversation history, allowing the chatbot to reference previous interactions within a session quickly.
+Summary Generation:
+
+Problem: Summarizing conversations to provide a quick overview of the interaction is essential for both the chatbot and human agents.
+Requirement: The system should generate accurate and concise summaries in real-time, enabling quick understanding of the conversation's context and progress.
+Knowledge Graph Integration:
+
+Problem: Maintaining an up-to-date knowledge graph that can be queried to provide relevant information during conversations is critical for addressing customer queries effectively.
+Requirement: The system must seamlessly integrate with a dynamic knowledge graph, supporting real-time updates and queries.
+Agent Workflow States Tracking:
+
+Problem: In scenarios where human agents are involved, tracking the workflow states of agents is necessary to manage the transition between chatbot and human support.
+Requirement: The system should capture and manage agent workflow states, ensuring smooth handoffs and continuity in the conversation.
+Semantic Cache with Vector Representations:
+
+Problem: Storing and retrieving semantically relevant information using vector representations is essential for understanding and responding to user queries accurately.
+Requirement: The system must support a semantic cache that allows for quick vector-based searches, enhancing the chatbot’s ability to provide contextually relevant responses.
+Retrieval-Augmented Generation (RAG) Workflow:
+
+Problem: Implementing a RAG-based workflow to support multi-turn, multi-pass conversations is challenging due to the need for integrating retrieval mechanisms with generative models.
+Requirement: The system must support a hybrid workflow where relevant information is retrieved and combined with generative models to produce accurate and context-aware responses.
+Objectives
+To address these challenges, we propose developing a comprehensive service called Memory as a Service. This service will provide the following features via low-latency APIs:
+
+Conversation History API: Captures and retrieves the complete history of interactions within a session.
+Summary API: Generates real-time summaries of conversations.
+Knowledge Graph API: Integrates with a knowledge graph to fetch and update relevant information dynamically.
+Agent Workflow API: Tracks and manages the states of human agents involved in the conversation.
+Semantic Cache API: Manages vector-based semantic cache for efficient storage and retrieval of contextually relevant information.
+RAG Workflow API: Implements a hybrid retrieval-augmented generation workflow to support multi-turn, multi-pass conversations.
+By providing these features, Memory as a Service aims to enhance the capabilities of the conversational chatbot, ensuring efficient, accurate, and context-aware customer support interactions.
+
 SELECT * FROM ChatHistory WHERE SessionID = 'session1'
 SELECT * FROM ChatHistory.SessionID-MessageType-Index WHERE SessionID = 'session1' AND MessageType = 'UserQuestion'
 SELECT * FROM ChatHistory.UserID-Timestamp-Index WHERE UserID = 'user1' AND Timestamp BETWEEN 1593600000 AND 1625133600
