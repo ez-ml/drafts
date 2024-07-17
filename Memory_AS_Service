@@ -907,7 +907,133 @@ Memory Interface: Implement the Memory Interface with methods for generating, wr
 Memory Component for Conversational Memory: Develop the Conversational Memory component to maintain conversation context and history.
 Phase 2:
 ----
-####
+########################################################################################################################
+
+dynamodb:
+  tableName: memory_service  # Name of the DynamoDB table
+  readCapacityUnits: 5  # Provisioned read capacity units for the table
+  writeCapacityUnits: 5  # Provisioned write capacity units for the table
+  partitionKey: SessionID  # Partition key attribute for the table
+  sortKey: TimeStamp  # Sort key attribute for the table
+  gsi:
+    - indexName: SessionID-MessageType-index  # Name of the Global Secondary Index (GSI)
+      partitionKey: SessionID  # Partition key for the GSI
+      sortKey: MessageType  # Sort key for the GSI
+      readCapacityUnits: 5  # Provisioned read capacity units for the GSI
+      writeCapacityUnits: 5  # Provisioned write capacity units for the GSI
+  queryOptions:
+    limit: 100  # Maximum number of items to return in the query
+    pagination:
+      enabled: true  # Enable pagination
+      pageSize: 20  # Number of items per page
+      exclusiveStartKey: ''  # Starting point for the next page of results
+    projectionExpression: 'SessionID, TimeStamp, MessageType, MessageContent'  # Attributes to return in the query results
+    filterExpression: 'MessageType = :messageType'  # Filter expression to refine query results
+    filterExpressionValues:
+      ':messageType': 'HumanMessage'  # Values for the filter expression
+    consistentRead: false  # Whether to use strongly consistent reads
+    scanIndexForward: true  # Whether to return results in ascending order
+    attributesToGet:
+      - SessionID
+      - TimeStamp
+      - MessageType
+      - MessageContent  # Specific attributes to retrieve from the table
 
 
+--
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('memory_service')
+
+def query_dynamodb(config, use_gsi=False):
+    # Base query parameters
+    query_params = {
+        'TableName': config['dynamodb']['tableName'],
+        'KeyConditionExpression': Key(config['dynamodb']['partitionKey']).eq('someSessionID')  # Key condition to filter results by partition key
+    }
+
+    # Use GSI if specified
+    if use_gsi:
+        query_params['IndexName'] = config['dynamodb']['gsi'][0]['indexName']
+        query_params['KeyConditionExpression'] = Key(config['dynamodb']['gsi'][0]['partitionKey']).eq('someSessionID') & Key(config['dynamodb']['gsi'][0]['sortKey']).eq('HumanMessage')
+
+    # Include sort key condition if applicable
+    if 'sortKey' in config['dynamodb']:
+        query_params['KeyConditionExpression'] = Key(config['dynamodb']['partitionKey']).eq('someSessionID') & Key(config['dynamodb']['sortKey']).begins_with('somePrefix')
+
+    # Additional query parameters from configuration
+    query_params.update({
+        'Limit': config['dynamodb']['queryOptions'].get('limit', 100),  # Limit the number of items returned
+        'ProjectionExpression': config['dynamodb']['queryOptions'].get('projectionExpression', ''),  # Attributes to retrieve
+        'ConsistentRead': config['dynamodb']['queryOptions'].get('consistentRead', False),  # Use strongly consistent reads if specified
+        'ScanIndexForward': config['dynamodb']['queryOptions'].get('scanIndexForward', True),  # Order of results
+        'AttributesToGet': config['dynamodb']['queryOptions'].get('attributesToGet', [])  # Specific attributes to get
+    })
+
+    # Include filter expression and values if specified
+    if 'filterExpression' in config['dynamodb']['queryOptions']:
+        filter_expression = config['dynamodb']['queryOptions']['filterExpression']
+        filter_expression_values = config['dynamodb']['queryOptions'].get('filterExpressionValues', {})
+        query_params['FilterExpression'] = filter_expression
+        query_params['ExpressionAttributeValues'] = filter_expression_values
+
+    # Include pagination settings if enabled
+    if 'pagination' in config['dynamodb']['queryOptions'] and config['dynamodb']['queryOptions']['pagination'].get('enabled', False):
+        exclusive_start_key = config['dynamodb']['queryOptions']['pagination'].get('exclusiveStartKey', '')
+        if exclusive_start_key:
+            query_params['ExclusiveStartKey'] = {'SessionID': exclusive_start_key}
+
+    # Execute the query
+    response = table.query(**query_params)
+    return response['Items']
+
+# Example configuration
+config = {
+    'dynamodb': {
+        'tableName': 'memory_service',  # Name of the DynamoDB table
+        'readCapacityUnits': 5,  # Provisioned read capacity units
+        'writeCapacityUnits': 5,  # Provisioned write capacity units
+        'partitionKey': 'SessionID',  # Partition key attribute
+        'sortKey': 'TimeStamp',  # Sort key attribute
+        'gsi': [
+            {
+                'indexName': 'SessionID-MessageType-index',  # Name of the GSI
+                'partitionKey': 'SessionID',  # Partition key for the GSI
+                'sortKey': 'MessageType',  # Sort key for the GSI
+                'readCapacityUnits': 5,  # Provisioned read capacity units for the GSI
+                'writeCapacityUnits': 5  # Provisioned write capacity units for the GSI
+            }
+        ],
+        'queryOptions': {
+            'limit': 100,  # Maximum number of items to return
+            'pagination': {
+                'enabled': True,  # Enable pagination
+                'pageSize': 20,  # Number of items per page
+                'exclusiveStartKey': ''  # Starting point for the next page of results
+            },
+            'projectionExpression': 'SessionID, TimeStamp, MessageType, MessageContent',  # Attributes to return
+            'filterExpression': 'MessageType = :messageType',  # Filter expression to refine results
+            'filterExpressionValues': {
+                ':messageType': 'HumanMessage'  # Values for the filter expression
+            },
+            'consistentRead': False,  # Use strongly consistent reads if specified
+            'scanIndexForward': True,  # Order of results
+            'attributesToGet': [
+                'SessionID',
+                'TimeStamp',
+                'MessageType',
+                'MessageContent'  # Specific attributes to get
+            ]
+        }
+    }
+}
+
+# Query the table using the specified configuration and GSI
+items = query_dynamodb(config, use_gsi=True)
+print(items)
+
+
+################################################################################################################################################################
 
