@@ -908,6 +908,13 @@ Memory Component for Conversational Memory: Develop the Conversational Memory co
 Phase 2:
 ----
 ########################################################################################################################
+Memory Service prioritizes flexibility and maintainability by externalizing all DynamoDB query parameters to a workflow configuration file. This means that critical settings such as TableName, PartitionKey, SortKey, limit, and other query options are specified in a YAML configuration file rather than being hard-coded within the service.
+
+This approach offers several advantages:
+
+Flexibility: Users can easily modify query parameters without changing the underlying code. This is particularly useful for adapting to different workflows or optimizing performance based on specific use cases.
+Maintainability: By centralizing configuration settings in a single file, we simplify the process of managing and updating these parameters. This reduces the risk of errors and ensures that changes can be made quickly and efficiently.
+Scalability: As workflows evolve, new parameters can be added to the configuration file without requiring code changes, allowing the service to scale seamlessly with user requirements.
 
 dynamodb:
   tableName: memory_service  # Name of the DynamoDB table
