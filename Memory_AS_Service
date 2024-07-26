@@ -1079,3 +1079,30 @@ class MyUser(HttpUser):
 
 if __name__ == "__main__":
     locust.run_single_user(MyUser)
+
+
+
+
++++++++++++++
+
+
+from fastapi import FastAPI
+import httpx
+
+app = FastAPI()
+
+async def async_task():
+    # Your async SDK method or any async task
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://jsonplaceholder.typicode.com/todos/1")
+        return response.json()
+
+@app.get("/")
+async def root():
+    result = await async_task()
+    return result
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8080)
+
