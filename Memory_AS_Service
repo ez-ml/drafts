@@ -1043,4 +1043,39 @@ print(items)
 
 
 ################################################################################################################################################################
+locust -f your_test_script.py
 
+your_test_script.py
+
+import locust
+from locust import HttpUser, TaskSet, task, between
+import gevent
+from gevent import monkey
+import asyncio
+
+# Patch standard library to be non-blocking
+monkey.patch_all()
+
+class MyTaskSet(TaskSet):
+    async def async_task(self):
+        # Replace this with your async SDK method
+        response = await self.client.get("/your_async_endpoint")
+        return response
+
+    @task
+    def run_async_task(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        response = loop.run_until_complete(self.async_task())
+        loop.close()
+        if response.status_code == 200:
+            self.success()
+        else:
+            self.failure()
+
+class MyUser(HttpUser):
+    tasks = [MyTaskSet]
+    wait_time = between(1, 5)
+
+if __name__ == "__main__":
+    locust.run_single_user(MyUser)
