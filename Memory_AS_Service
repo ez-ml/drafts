@@ -1,5 +1,39 @@
+import asyncio
+import httpx
+import time
 
+async def post_request(url, payload):
+    async with httpx.AsyncClient() as client:
+        start_time = time.perf_counter()
+        response = await client.post(url, json=payload)
+        end_time = time.perf_counter()
+        response_time_ms = (end_time - start_time) * 1000  # Convert to milliseconds
+        print(f"Response time: {response_time_ms:.2f} ms")
+        return response
 
+async def main():
+    url = "http://example.com/perf"
+    payload = {"session_id": "session1"}
+    
+    # Number of concurrent requests
+    num_requests = 5
+    
+    # Create a list of tasks
+    tasks = [post_request(url, payload) for _ in range(num_requests)]
+    
+    # Run the tasks concurrently
+    responses = await asyncio.gather(*tasks)
+    
+    # Print the responses
+    for response in responses:
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.text}")
+
+# Run the main function
+if __name__ == "__main__":
+    asyncio.run(main())
+
++++++
 
 
 
