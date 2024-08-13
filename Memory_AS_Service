@@ -1,3 +1,58 @@
+geni.workflow.components.session_base.py
+
+TABLE_NAME = "SessionMemory"
+
+class DynamoDBSessionBase:
+    def __init__(self, session_id, dynamo_table, **kwargs):
+        self.session_id = session_id
+        self.dynamo_table = dynamo_table
+        self.state = {}
+
+    def load_state(self):
+        response = self.dynamo_table.query(
+            KeyConditionExpression=Key('session_id').eq(self.session_id)
+        )
+        items = response.get('Items', [])
+        for item in items:
+            agent_name = item['agent_name']
+            self.state[agent_name] = item['state_data']
+
+    def save_state(self, agent):
+        self.dynamo_table.put_item(
+            Item={
+                'session_id': self.session_id,
+                'agent_name': agent,
+                'state_data': self.state[agent]
+            }
+        )
+
+
+
+#####How this class get used in Agentic Workflow#######
+from geni.workflow.components.session_base import DynamoDBSessionBase
+
+class SessionBase(DynamoDBSessionBase):
+    def __init__(self, session_id, dynamo_table, **kwargs):
+        super().__init__(session_id, dynamo_table, **kwargs)
+        self.load_state()  # Load state from DynamoDB
+
+    def get(self, agent):
+        return self.state.get(agent, {})
+
+    def set(self, agent, value):
+        self.state[agent] = value
+        self.save_state(agent)  # Save state to DynamoDB
+
+    def get_key(self, agent, key):
+        return self.state.get(agent, {}).get(key)
+
+    def set_key(self, agent, key, value):
+        if agent not in self.state:
+            self.state[agent] = {}
+        self.state[agent][key] = value
+        self.save_state(agent)  # Save state to DynamoDB
+
+---
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
