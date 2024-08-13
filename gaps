@@ -62,3 +62,26 @@ Implement a process for regularly reviewing the alignment between architecture a
 While the current implementation using a custom SessionBase deviates from the intended architecture, the introduction of DynamoDBSessionBase serves as a practical bridge to align the system more closely with the original design principles. Moving forward, efforts should be made to integrate the architectural components fully, leveraging the benefits of LangGraph’s Checkpointer and LangChain’s chat_history while maintaining the flexibility and scalability provided by DynamoDB.
 
 By addressing these gaps and implementing the recommended actions, we can ensure that the system remains robust, maintainable, and scalable, while staying true to the architectural vision.
+
+
+
+class SessionBase(DynamoDBSessionBase):
+    def __init__(self, session_id, dynamo_table, **kwargs):
+        super().__init__(session_id, dynamo_table, **kwargs)
+        self.load_state()  # Load state from DynamoDB
+
+    def get(self, agent):
+        return self.state.get(agent, {})
+
+    def set(self, agent, value):
+        self.state[agent] = value
+        self.save_state(agent)  # Save state to DynamoDB
+
+    def get_key(self, agent, key):
+        return self.state.get(agent, {}).get(key)
+
+    def set_key(self, agent, key, value):
+        if agent not in self.state:
+            self.state[agent] = {}
+        self.state[agent][key] = value
+        self.save_state(agent)  # Save state to DynamoDB
