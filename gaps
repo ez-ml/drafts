@@ -40,6 +40,29 @@ class DynamoDBSessionBase:
         self.save_state(agent)  # Save state to DynamoDB
 
 
+
+
+
+lass SessionBase(DynamoDBSessionBase):
+    def __init__(self, session_id, dynamo_table, **kwargs):
+        super().__init__(session_id, dynamo_table, **kwargs)
+        # Additional initialization for SessionBase, if needed
+
+
+
+# Assuming dynamo_table is already initialized
+dynamodb = boto3.resource('dynamodb')
+dynamo_table = dynamodb.Table("SessionMemory")
+
+# Create an instance of the new SessionBase class
+session = SessionBase("session123", dynamo_table)
+
+# Use the inherited methods
+session.set_key('Agent1', 'some_key', 'some_value')
+print(session.get_key('Agent1', 'some_key'))
+
+# The state will be automatically saved to DynamoDB
+
 ----
 Document: Addressing Gaps Between Architecture and Implementation
 1. Introduction
