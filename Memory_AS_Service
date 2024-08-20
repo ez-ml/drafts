@@ -60,3 +60,90 @@ loaded_obj = load_object_from_dynamodb({'id': '123'})
 if loaded_obj:
     print(loaded_obj.name)
     print(loaded_obj.data)
+----
+
+
+import boto3
+
+# Assuming your AWS credentials are configured or set using boto3 setup
+dynamodb = boto3.resource('dynamodb')
+table_name = 'YourTableName'
+table = dynamodb.Table(table_name)
+
+# Generic to_dict function
+def to_dict(obj):
+    if not hasattr(obj, '__dict__'):
+        raise TypeError("to_dict function can only be applied to Python class instances")
+    
+    # Include the class name in the dictionary for future reconstruction
+    obj_dict = obj.__dict__.copy()
+    obj_dict['__class__'] = obj.__class__.__name__
+    obj_dict['__module__'] = obj.__module__
+    return obj_dict
+
+# Generic from_dict function
+def from_dict(d):
+    if not isinstance(d, dict) or '__class__' not in d or '__module__' not in d:
+        raise TypeError("from_dict function requires a dictionary with __class__ and __module__ keys")
+    
+    # Extract the class name and module from the dictionary
+    class_name = d.pop('__class__')
+    module_name = d.pop('__module__')
+    
+    # Import the module and get the class
+    module = __import__(module_name)
+    class_ = getattr(module, class_name)
+    
+    # Create a new instance of the class using the remaining dict as kwargs
+    obj = class_(**d)
+    return obj
+
+# Save the object to DynamoDB
+def save_object_to_dynamodb(obj):
+    # Convert object to dictionary
+    item = to_dict(obj)
+    # Add any required keys or attributes for DynamoDB
+    table.put_item(Item=item)
+
+# Load the object from DynamoDB
+def load_object_from_dynamodb(key):
+    # Retrieve the item from DynamoDB
+    response = table.get_item(Key=key)
+    item = response.get('Item')
+    if item:
+        # Convert dictionary back to object
+        obj = from_dict(item)
+        return obj
+    else:
+        return None
+
+# Example classes
+class MyClassA:
+    def __init__(self, id, name, data):
+        self.id = id
+        self.name = name
+        self.data = data
+
+class MyClassB:
+    def __init__(self, id, value):
+        self.id = id
+        self.value = value
+
+# Example usage
+my_obj_a = MyClassA(id='123', name='SampleA', data={'key1': 'value1', 'key2': 'value2'})
+my_obj_b = MyClassB(id='456', value=42)
+
+# Save to DynamoDB
+save_object_to_dynamodb(my_obj_a)
+save_object_to_dynamodb(my_obj_b)
+
+# Load from DynamoDB
+loaded_obj_a = load_object_from_dynamodb({'id': '123'})
+loaded_obj_b = load_object_from_dynamodb({'id': '456'})
+
+if loaded_obj_a:
+    print(loaded_obj_a.name)  # Output: SampleA
+    print(loaded_obj_a.data)  # Output: {'key1': 'value1', 'key2': 'value2'}
+
+if loaded_obj_b:
+    print(loaded_obj_b.value)  # Output: 42
