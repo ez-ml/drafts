@@ -1,30 +1,33 @@
-
 import boto3
-import json
 
 # Assuming your AWS credentials are configured or set using boto3 setup
 dynamodb = boto3.resource('dynamodb')
 table_name = 'YourTableName'
 table = dynamodb.Table(table_name)
 
-# Example Python class
+# Example Python class that you cannot modify
 class MyClass:
     def __init__(self, id, name, data):
         self.id = id
         self.name = name
         self.data = data
-    
-    def to_dict(self):
-        return self.__dict__
 
-    @classmethod
-    def from_dict(cls, d):
-        return cls(**d)
+# External to_dict function
+def to_dict(obj):
+    return {
+        'id': obj.id,
+        'name': obj.name,
+        'data': obj.data,
+    }
+
+# External from_dict function
+def from_dict(d):
+    return MyClass(id=d['id'], name=d['name'], data=d['data'])
 
 # Save the object to DynamoDB
 def save_object_to_dynamodb(obj):
     # Convert object to dictionary
-    item = obj.to_dict()
+    item = to_dict(obj)
     # Add any required keys or attributes for DynamoDB
     table.put_item(Item=item)
 
@@ -35,7 +38,7 @@ def load_object_from_dynamodb(key):
     item = response.get('Item')
     if item:
         # Convert dictionary back to object
-        obj = MyClass.from_dict(item)
+        obj = from_dict(item)
         return obj
     else:
         return None
