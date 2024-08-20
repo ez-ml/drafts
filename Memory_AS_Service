@@ -12,16 +12,22 @@ class MyClass:
         self.name = name
         self.data = data
 
-# External to_dict function
+# External to_dict function with type check
 def to_dict(obj):
+    if not isinstance(obj, MyClass):
+        raise TypeError("to_dict function can only be applied to instances of MyClass")
+    
     return {
         'id': obj.id,
         'name': obj.name,
         'data': obj.data,
     }
 
-# External from_dict function
+# External from_dict function with type check
 def from_dict(d):
+    if not isinstance(d, dict) or 'id' not in d or 'name' not in d or 'data' not in d:
+        raise TypeError("from_dict function requires a dictionary with specific keys")
+    
     return MyClass(id=d['id'], name=d['name'], data=d['data'])
 
 # Save the object to DynamoDB
