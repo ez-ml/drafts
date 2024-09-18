@@ -1,10 +1,10 @@
-I wanted to provide a quick update on the "Customer Assist Workflow" deployment. As you're aware, the AIF team won't be ready with the required changes for CA until the first week of December, and their planning is still in progress.
+I wanted to give you a quick update on the progress of the "Customer Assist Workflow" deployment, especially considering that I’m on PIP with the expectation to deliver the workflow in Non-Prod by the first week of October.
 
-In the meantime, I’ve completed the Dev deployment and remain on track to finish the QA deployment with Exchange API integration by the end of this month, as part of my PIP goal to deliver the workflow by the first week of October. The current deployment will operate as an FS Dealer Assist workflow, sending dummy requests to MACAW and receiving responses, but it won't be able to process Customer Assist-specific attributes until the AIF team is ready.
+So far, I’ve made good progress and completed the deployment in Dev. I'm on track to finish the QA deployment with Exchange API integration by the end of this month. However, a significant blocker has come up — the AIF team won't be ready with the required changes for Customer Assist (CA) until the first week of December.
 
-Please let me know if you have any concerns regarding the current status or if you’d like to discuss further.
+Due to this, the current deployment will function like the FS Dealer Assist workflow, sending dummy requests to MACAW and receiving responses, but it won't fully support or process Customer Assist-specific attributes until AIF is ready.
 
-
+I wanted to set this expectation with you and see if you have any concerns about the current status.
 
 ---
 1. Objective
