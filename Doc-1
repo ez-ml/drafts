@@ -1,10 +1,6 @@
-I wanted to give you a quick update on the progress of the "Customer Assist Workflow" deployment, especially considering that I’m on PIP with the expectation to deliver the workflow in Non-Prod by the first week of October.
+curl_command = f"curl -X POST {external_api_url} -H 'Content-Type: application/json' -d '{json.dumps(payload)}'"
+    print(f"Equivalent cURL command:\n{curl_command}")
 
-So far, I’ve made good progress and completed the deployment in Dev. I'm on track to finish the QA deployment with Exchange API integration by the end of this month. However, a significant blocker has come up — the AIF team won't be ready with the required changes for Customer Assist (CA) until the first week of December.
-
-Due to this, the current deployment will function like the FS Dealer Assist workflow, sending dummy requests to MACAW and receiving responses, but it won't fully support or process Customer Assist-specific attributes until AIF is ready.
-
-I wanted to set this expectation with you and see if you have any concerns about the current status.
 
 ---
 1. Objective
