@@ -1,6 +1,47 @@
+Technical Design Document (TDD) for Dynamic Executor - Plan and Execute Style Agent
+1. Problem Statement
+The demand for Plan and Execute style agents has grown substantially as organizations and teams seek to automate and streamline complex workflows. Plan and Execute agents are capable of taking high-level objectives or plans and breaking them down into actionable steps, allowing for dynamic and efficient execution. These agents leverage planning, reasoning, and task execution to enhance their ability to solve problems without requiring constant human intervention.
 
+The LangChain framework demonstrates how Planning and Execution agents can be valuable in a range of scenarios. By integrating these agents into an organization's system, it enables tasks such as conditional planning, multi-tool execution, and complex decision-making workflows.
 
+From your team’s perspective, having such an offering would immensely boost tenant teams' timelines by automating task execution and providing a robust solution for managing multi-stage processes. Currently, there is no such offering within the GenAI Platform, leaving tenant teams without a reliable solution to streamline workflows.
 
+In addition to the core benefits, there is a need to foster a collaborative model where tenant teams can contribute directly to the platform, building and customizing their workflows based on their unique requirements. Introducing a Plan and Execute agent framework would be a key addition to the GenAI Platform, enhancing productivity and reducing the need for custom-built solutions.
+
+2. Solution Approaches
+There are multiple approaches to building Plan and Execute agents, as explored in the LangChain platform. The following are the key approaches based on the LangChain Planning Agent architecture:
+
+Approach 1: Basic Plan and Execute Agents
+This is the simplest approach where the agent takes a high-level plan and breaks it into executable tasks. Each task is executed sequentially based on predefined conditions or rules, ensuring that the execution follows the intended order.
+
+Pros: Simple and straightforward.
+Cons: Limited in handling parallel workflows or adapting to dynamic conditions in real time.
+Approach 2: Agents with Conditional Task Execution
+In this approach, agents can dynamically decide whether to execute tasks based on certain conditions or triggers. This approach leverages more advanced logic where tasks are executed only when the conditions are satisfied.
+
+Pros: Provides more flexibility to adapt to varying conditions.
+Cons: Requires complex rule-setting and higher computation costs.
+Approach 3: Multi-Tool Plan and Execute Agents
+Here, the agent can handle multiple tools and execute parallel tasks across different tools. This model is essential when workflows need to perform multiple actions simultaneously. For example, an agent might need to retrieve data from multiple sources and run different algorithms before producing a final output.
+
+Pros: Optimizes task execution through parallelization and multi-tool management.
+Cons: Increases complexity and requires robust coordination across tools.
+Approach 4: Adaptive and Autonomous Agents
+These agents not only execute tasks but can also adjust the plan based on feedback from the task outcomes. The agent can dynamically change the plan, reorder tasks, or cancel tasks if certain conditions are met.
+
+Pros: Extremely powerful for dynamic and evolving workflows.
+Cons: Computationally intensive and requires continuous monitoring of task states.
+3. Proposal
+We are building a framework capability that will enable the creation of Plan and Execute style agents. This architecture will allow the dynamic execution of tasks based on input plans, using both sequential and parallel task handling, as outlined in the attached diagram. By leveraging frameworks like LangChain and our internal GenAI components, we will enable the seamless integration of these agents into existing workflows.
+
+Proposal Outline:
+Input Plan Schemas: The system will accept plans in different formats (e.g., Python code, conditional graphs), as demonstrated in the diagram.
+Plan Parsing: The framework will include a Python AST Parser and DAG Parser to convert input plans into iterable data structures like AST and DAG.
+Task Producers: Based on the parsed plans, the system will produce tasks and organize them for execution in a structured manner. These tasks will either be sequential or parallel, managed by components such as the AST Task Producer and DAG Task Producer.
+Task Execution and Management: The tasks will then be queued and executed by the Task Executor, which will manage the task states and ensure successful completion or retries as needed. The state of each task will be updated in the State Object to reflect the real-time execution progress.
+By enabling this Plan and Execute Agent Architecture, we can empower tenant teams to collaborate, contribute, and create their custom workflows. This offering fits into the broader framework of component-based architecture within the GenAI Platform, allowing teams to leverage existing tools and retrievers while customizing their workflows.
+
+----------------------------------------------------------------------------------------------------
 Technical Design Document (TDD) for Dynamic Executor Agent Using LangChain Runnable Components with Workflow Framework Tools (Without LLMCompiler)
 
 1. Overview
