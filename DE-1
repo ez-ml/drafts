@@ -1,3 +1,53 @@
+Input Plan (AST Format):
+plan_ast = {
+    "tool_1": None,  # Fetch customer data
+    "tool_2": {"input": "${1}"},  # Validate data based on tool_1's output
+    "tool_3": {"input": "${1}", "async": True},  # Send notification in parallel
+    "tool_4": {"input": "${2}", "async": True}  # Generate report after tool_2
+}
+
+Input Plan (DAG Format - YAML):
+tasks:
+  - id: 1
+    tool: "tool_1"
+    description: "Fetch customer data"
+  - id: 2
+    tool: "tool_2"
+    depends_on: [1]
+  - id: 3
+    tool: "tool_3"
+    depends_on: [1]
+    async: true
+  - id: 4
+    tool: "tool_4"
+    depends_on: [2]
+    async: true
+
+
+Output
+{
+  "parsed_plan": {
+    "tasks": [
+      {"id": 1, "name": "fetch_data", "dependencies": []},
+      {"id": 2, "name": "analyze_data", "dependencies": [1]},
+      {"id": 3, "name": "transform_data", "dependencies": [1]}
+    ]
+  }
+}
+----
+
+Output from Task Producer
+[
+  Task(id=1, name='fetch_data', dependencies=[]),
+  Task(id=2, name='analyze_data', dependencies=[1]),
+  Task(id=3, name='transform_data', dependencies=[1])
+]
+
+---
+Inocation Output
+
+
+---
 
 ---------------------
 Overview
