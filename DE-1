@@ -1,3 +1,96 @@
+
+import asyncio
+from llm_compiler.output_parser import OutputParser
+from llm_compiler.task_fetching_unit import TaskFetchingUnit
+
+# PlanParserAdapter Class
+class PlanParserAdapter:
+    def __init__(self, plan_text):
+        self.plan_text = plan_text
+    
+    def parse(self):
+        print("Adapting plan parsing...")
+        parser = OutputParser()
+        parsed_plan = parser.parse_output(self.plan_text)
+        print("Plan parsing adapted.")
+        return parsed_plan
+
+# TaskProducerAdapter Class
+class TaskProducerAdapter:
+    def __init__(self, parsed_plan):
+        self.parsed_plan = parsed_plan
+
+    def produce_tasks(self):
+        print("Adapting task production...")
+        tasks = []
+        for step in self.parsed_plan['steps']:
+            task = {
+                'task_id': step['id'],
+                'action': step['action'],
+                'parameters': step['parameters']
+            }
+            tasks.append(task)
+        print("Task production adapted.")
+        return tasks
+
+# TaskExecutorAdapter Class
+class TaskExecutorAdapter:
+    def __init__(self, task):
+        self.task = task
+
+    async def execute_task(self):
+        print(f"Adapting task execution for task {self.task['task_id']}...")
+        task_fetching_unit = TaskFetchingUnit()
+        result = None
+        if self.task['action'] == "Extract feedback data":
+            result = await self.execute_tool("Tool A")
+        elif self.task['action'] == "Perform sentiment analysis":
+            result = await self.execute_tool("Tool B")
+        elif self.task['action'] == "Summarize the results":
+            result = await self.execute_tool("Tool C")
+        print(f"Task execution adapted for task {self.task['task_id']}.")
+        return result
+
+    async def execute_tool(self, tool_name):
+        print(f"Executing {tool_name} with action: {self.task['action']}")
+        await asyncio.sleep(1)  # Simulate execution delay
+        return f"{tool_name} result for {self.task['action']}"
+
+# TaskJoinerAdapter Class
+class TaskJoinerAdapter:
+    def __init__(self, results):
+        self.results = results
+
+    def join_results(self):
+        print("Adapting task joining...")
+        final_output = "\n".join(self.results)
+        print("Task joining adapted.")
+        return final_output
+
+# Full workflow with async task execution and class-based adapters
+async def run_workflow():
+    # Step 1: Parse the high-level plan
+    plan_parser = PlanParserAdapter(high_level_plan)
+    parsed_plan = plan_parser.parse()
+
+    # Step 2: Produce tasks
+    task_producer = TaskProducerAdapter(parsed_plan)
+    tasks = task_producer.produce_tasks()
+
+    # Step 3: Execute tasks asynchronously
+    task_results = await execute_all_tasks(tasks)
+
+    # Step 4: Join results into a final output
+    task_joiner = TaskJoinerAdapter(task_results)
+    final_output = task_joiner.join_results()
+
+    print(f"Final Output:\n{final_output}")
+
+# Run the workflow
+asyncio.run(run_workflow())
+
+
+----
 Proposal to Introduce the Tools Registry Feature
 The absence of a centralized Tools Registry is exposing the platform to several operational and security risks. Without a controlled mechanism to register and validate tools, issues such as unauthorized tool usage, lack of version management, and inconsistent functionality arise. This leads to potential misuse, security vulnerabilities, and operational inefficiencies. In the current state, tools can be invoked without proper oversight, making it difficult to govern tool usage, prevent resource abuse, and ensure compliance with business logic.
 
