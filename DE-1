@@ -1,3 +1,19 @@
+Proposal to Introduce the Tools Registry Feature
+The absence of a centralized Tools Registry is exposing the platform to several operational and security risks. Without a controlled mechanism to register and validate tools, issues such as unauthorized tool usage, lack of version management, and inconsistent functionality arise. This leads to potential misuse, security vulnerabilities, and operational inefficiencies. In the current state, tools can be invoked without proper oversight, making it difficult to govern tool usage, prevent resource abuse, and ensure compliance with business logic.
+
+We propose implementing a Tools Registry to manage tool metadata, allowed functions, and version control centrally. This registry will enforce signature validation, ensuring that only authorized tool functions are invoked with the correct parameters, thus mitigating risks like invalid inputs and unauthorized tool behaviors. However, it's important to note that while signature validation can prevent incorrect function usage, it does not address the full validation of business logic, and deeper controls like resource management and security audits will be required.
+
+Two-Phased Approach
+1. Short-Term Approach (Manual Yaml-Based Registry): In the short term, we propose maintaining tool metadata in a YAML file that will be managed by the Platform Team. This file will define the tool signatures, including function names, allowed parameters, types, and expected outputs. Each time a tool is added or updated, the Platform Team will validate and update the YAML file, ensuring proper oversight.
+
+This approach offers a quick solution to gain immediate control over tool invocations without major infrastructural changes. It allows us to introduce governance and validation in a simplified manner while giving the team time to plan for a more scalable, automated solution.
+
+2. Long-Term Approach (Self-Service Registry with DynamoDB and API): For long-term scalability and self-service capability, we propose building a more robust, self-service-based Tools Registry. This approach will involve using DynamoDB as the backend to store tool metadata and version information, fronted by a RESTful API built with FastAPI. This API will allow authorized users to register, update, and query tool information programmatically, enabling flexibility and removing the dependency on the Platform Team for manual updates.
+
+This self-service model provides better scalability and empowers teams to manage their own tools while maintaining central control. The API will enforce validation rules, such as signature matching, and the backend will provide built-in scalability and resilience via DynamoDB.
+
+While the first approach allows for quick adoption and governance, the second approach paves the way for a fully automated, scalable system that can handle future growth and increasing tool complexity across teams.
+---------
 Input Plan (AST Format):
 plan_ast = {
     "tool_1": None,  # Fetch customer data
