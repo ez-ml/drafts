@@ -1,0 +1,77 @@
+
+Self-Evaluation for 2024 Performance Review
+Name: [Your Name]
+Role: Project Lead, GenAI Platform Team
+Company: Capital One
+Summary of Accomplishments
+As the Platform Tech Lead in the GenAI Platform team at Capital One, my key responsibilities are :
+Pursuing the GenAI platform and underlying service development roadmap
+Driving tenant onboarding (LLB) to the GenAI platform, providing post-production support, 
+Leading the team towards our organizational goals. My role also requires me to manage cross-functional teams, ensuring the alignment of objectives and the successful delivery of platform services.
+Over the past year, I have taken a leadership role in multiple high-impact projects, ensuring their successful delivery and alignment with organizational objectives. My contributions span areas of innovation, collaboration, and strategic execution. Below are the key projects i have worked on and its alignment towards the Role objective and their respective outcomes for 2024:
+Objective 1: Pursuing GenAI Platform Development Roadmap
+1. Memory Service
+Objective: Develop and deploy a high-performance memory service for tenant workflows.
+Contribution: I led the entire process from requirements gathering, design, and development to deployment. The service has been adopted by multiple workflows like Dealer Assist and Customer Assist.
+Outcome: The project delivered high-volume request-response cycles with minimal latency, showcasing both efficiency and innovation. This project has been referenced as a case study for excellent project management and cross-team collaboration.
+2. Dynamic Executor Service
+Objective: Develop a scalable agent for tenants to execute customized plans.
+Contribution: I spearheaded the roadmap, conducted research, coordinated with tenant teams, and oversaw the design and development phases.
+Outcome: The design is complete, and the team is on track to deliver the service by December 2024. My leadership has been pivotal in aligning the team’s efforts toward timely execution.
+Objective 2: Driving Tenant Onboarding (LLB) and Post-Production Support
+3. Customer Assist
+Objective: Build backend services for AI-based customer interaction (chatbots).
+Contribution: As the project lead, I coordinated with ECP and AI/ML teams to ensure timely delivery, aligning platform roadmaps with tenant expectations.
+Outcome: The infrastructure is fully deployed, ensuring a smooth tenant onboarding experience and minimizing potential post-deployment risks.
+4. Prom Template Management
+Objective: Execute and manage Capital One’s infrastructure and workflow integration.
+Contribution: Despite facing challenges due to architectural misalignment, I took the initiative to realign the project and keep it progressing.
+Outcome: The project is in its final stages and will resume completion in the upcoming quarter.
+DevAssist
+Objective: Ensure smooth tenant onboarding and support for the DevAssist project.
+Contribution: I actively participated in the tenant integration and provided troubleshooting support during the onboarding phase.
+Outcome: I played a key role in bridging gaps between teams, ensuring that DevAssist met its deadlines and delivered the expected service quality.
+6. FS-Dealer Assist
+Objective: Provide post-production support for the FS-Dealer Assist program.
+Contribution: I took on the responsibility of supporting this project whenever the primary lead was unavailable, ensuring there were no disruptions in service.
+Outcome: My proactive engagement helped to maintain continuous service and meet customer expectations, further improving the reliability of this platform for the dealers.
+Objective 3: Leadership and Team Management
+Team Leadership
+In addition to my technical responsibilities, I lead and mentor cross-functional teams across multiple projects, ensuring the alignment of individual tasks with broader business objectives. I have fostered a collaborative and results-driven culture, guiding my team through complex technical challenges, as seen in projects like Memory Service and Dynamic Executor.
+Communication and Collaboration
+Effective communication has been at the core of my leadership approach. I have worked closely with external and internal teams, including tenants, the AI/ML team, and project management, to ensure we are aligned on priorities and timelines. My proactive communication has enabled smooth project delivery and minimal delays.
+
+Key Strengths and Areas of Focus
+Job-Specific Skills
+Rating: Very Strong
+I have consistently demonstrated a high level of technical expertise across various complex projects. My work on the Memory Service and Dynamic Executor Service showcases my proficiency in designing scalable, high-performance architectures. By employing cutting-edge tools and methodologies, I have delivered solutions that address high-volume requests with minimal latency, resulting in enhanced tenant workflows and improved system efficiency. Additionally, my involvement in the DevAssist and FS-Dealer Assist projects has expanded my technical capabilities to effectively troubleshoot and support tenant onboarding processes.
+2. Leadership and Team Management
+Rating: Excellent
+I have played a key leadership role in several projects, managing cross-functional teams and aligning them toward successful project deliveries. I have guided my team members through complex technical challenges, fostering a collaborative work environment and ensuring that project milestones are met ahead of schedule. My leadership in Dynamic Executor Service and Customer Assist highlights my ability to manage roadmaps, design reviews, and team coordination. Additionally, my mentorship of team members has helped improve their skill sets, resulting in greater overall team performance and timely project completions.
+3. Communication
+Rating: Excellent
+Effective communication has been a central component of my role. I have proactively coordinated with internal and external teams, ensuring that objectives are clear and aligned across stakeholders. This has been particularly evident in the Customer Assist and Prom Template Management projects, where cross-team collaboration was critical. I have tailored my communication style to suit diverse audiences, from technical teams to external partners, which has helped avoid potential miscommunications and delays. My open and transparent communication approach has fostered strong partnerships with tenants, ensuring smooth onboarding and post-production support.
+4. Customer Focus
+Rating: Excellent
+Throughout the year, I have actively pursued solutions that meet and exceed customer expectations. My involvement in projects such as FS-Dealer Assist and DevAssist demonstrates my commitment to delivering solutions that address customer needs while ensuring a seamless onboarding experience. I prioritize customer satisfaction by ensuring that the services provided are not only efficient but also aligned with the tenant’s long-term goals. By anticipating potential issues and resolving them proactively, I have contributed to enhanced customer experiences and maintained high service levels.
+5. Problem Solving and Innovation
+Rating: Very Strong
+I have exhibited strong problem-solving abilities, applying innovative approaches to address challenges early in the project lifecycle. A prime example is the Memory Service project, where I identified inefficiencies in the asynchronous model early on and revamped the architecture to deliver a more scalable solution. My analytical thinking, combined with a focus on practical solutions, has also been demonstrated in my proactive handling of potential bottlenecks in Dynamic Executor Service and Prom Template Management. These solutions have not only solved immediate problems but also prevented future issues, enhancing overall project success.
+6. Result Focus
+Rating: Excellent
+I consistently work with a focus on achieving results efficiently and effectively. My work on Memory Service, Dynamic Executor Service, and Customer Assist has contributed to critical business outcomes, ensuring smooth operations and improved performance for both internal teams and tenants. I remain dedicated to delivering top-notch results through meticulous planning, collaboration, and execution, and I consistently strive to achieve the best possible outcomes by leveraging all available resources.
+
+
+
+
+Professional Goals and Aspirations for the Coming Year
+One of my key aspirations is to progress toward the role of Distinguished Engineer within Capital One. To achieve this, I plan to:
+Expand Technical Expertise: I aim to deepen my knowledge in AI/ML and cloud-based architectures, for which I seek your support in participating in external seminars, industry conferences, and additional training.
+Higher Education: I am interested in pursuing a higher degree in a relevant field, such as cloud architecture or AI, through industry-recognized institutions or universities. I request your support in allocating some time each quarter for these educational pursuits and assisting with identifying opportunities for further development.
+Enhance Leadership Capabilities: I plan to take on more mentoring responsibilities and further refine my delegation skills to empower team members, improving efficiency.
+Your encouragement in these areas would greatly benefit my long-term career growth and ability to contribute at a higher strategic level.
+
+Conclusion
+I want to extend my gratitude for the guidance and support you have provided over the years. Your mentorship has been instrumental in my development, and I am excited to continue this collaborative relationship as we move forward into new challenges and opportunities. I look forward to continuing to contribute to the success of the GenAI platform and Capital One as a whole.
+Thank you for your continued trust and for the opportunities to grow and take on new challenges.
+
