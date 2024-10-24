@@ -1,3 +1,38 @@
+FunctionDef(
+    name='dynamic_executor_plan',
+    args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+    body=[
+        Assign(
+            targets=[Name(id='llm_input_data', ctx=Store())],
+            value=Call(func=Name(id='fetch_data', ctx=Load()), args=[
+                keyword(arg='source', value=Constant(value='data_source_1'))
+            ])
+        ),
+        Assign(
+            targets=[Name(id='llm_raw_output', ctx=Store())],
+            value=Call(func=Name(id='run_llm_model', ctx=Load()), args=[
+                keyword(arg='llm_input', value=Name(id='llm_input_data', ctx=Load()))
+            ])
+        ),
+        Assign(
+            targets=[Name(id='processed_output', ctx=Store())],
+            value=Call(func=Name(id='postprocess_output', ctx=Load()), args=[
+                keyword(arg='raw_output', value=Name(id='llm_raw_output', ctx=Load()))
+            ])
+        ),
+        Assign(
+            targets=[Name(id='success', ctx=Store())],
+            value=Call(func=Name(id='save_output', ctx=Load()), args=[
+                keyword(arg='final_output', value=Name(id='processed_output', ctx=Load()))
+            ])
+        ),
+        Return(value=Name(id='success', ctx=Load()))
+    ]
+)
+
+
+---
+
 https://docs.google.com/document/d/1N0vN820kjdxHQXASaE4R8haPTUUHkgITWvIneaPMhoM/edit?usp=sharing
 
 ---
