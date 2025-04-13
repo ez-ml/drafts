@@ -1,0 +1,127 @@
+Proposal: FastLane Onboarding Automation
+The FastLane Onboarding Automation is designed to eliminate repetitive and error-prone manual steps currently involved in onboarding new tenants to our LLM & RAG Platform.
+
+🎯 Goals:
+Minimize tenant manual effort
+
+Accelerate tenant onboarding
+
+Automate error-prone manual tasks
+
+Provide clear visibility and intuitive experience
+
+✅ Current vs. Improved Process Mapping:
+Current Manual Step	New Automated Step (with intuitive names)	Responsibility
+1. Pipeline Component Creation
+(Manual, but acceptable)	Pipeline QuickStart
+Manual, no immediate automation required	Platform Team
+2. K8 Namespace Creation
+(In progress by SRE team)	AutoNamespace Provisioner
+Automated Kubernetes Namespace creation with self-service UI and API	SRE Team (with collaboration)
+3. Tenant RBAC & Secret Management
+(Manual system account & grant creation, HashiCorp → AWS Secrets Manager migration)	SecureAccess AutoRBAC
+Automated RBAC provisioning & AWS Secret Manager Integration, replacing manual steps with template-driven workflows	Platform Team (with minimal tenant input)
+4. Git Repo Creation
+(Bot setup and manual onboarding)	GitAutoPilot
+Fully automated repo creation and bot onboarding in tenant's Git organization	Platform Team (automated bot onboarding)
+5. FM Gateway Setup
+(Manual assessment and onboarding)	FastRoute Gateway
+Automated FM Gateway provisioning, pre-integrated validation, and auto-assessment reporting	Platform Team
+🔄 Detailed Automation Steps
+1. Pipeline QuickStart (Minimal Effort)
+Keep this manual (already minimal overhead).
+
+Future scope: Review semi-automation (templates & self-service portal).
+
+2. AutoNamespace Provisioner
+SRE team to deliver automated Kubernetes namespace provisioning:
+
+Self-Service Portal: Tenants request namespaces via UI/API.
+
+Auto-Provisioning: Namespace created instantly via automation scripts.
+
+Visibility: Status and logs provided back immediately.
+
+Benefit: Eliminates SRE bottlenecks, reduces delays.
+
+3. SecureAccess AutoRBAC
+Shift from HashiCorp Lockbox to AWS Secrets Manager:
+
+Template-driven Roles: Predefined AWS IAM and Kubernetes roles auto-generated.
+
+System Account Automation: Auto-creation of Kubernetes system account linked to IAM roles.
+
+Integrated AWS Secrets Manager: Secure and simplified integration via pre-defined policies.
+
+Tenant Interaction: Minimal, intuitive web-based selection.
+
+Benefit: Removes extensive manual tenant tasks, reduces onboarding errors significantly.
+
+4. GitAutoPilot
+Automated Git repo creation and bot onboarding:
+
+Auto-provision repo in tenant's GitHub/GitLab org.
+
+Bot Onboarding: Automatic addition of CI/CD bot accounts, credentials, and webhook setup.
+
+Tenant Interaction: Single-click authorization.
+
+Benefit: Removes manual tenant intervention, immediate readiness for deployment pipelines.
+
+5. FastRoute Gateway
+Automated provisioning & validation for FM Gateway:
+
+Auto-provision Gateway resources based on tenant selections.
+
+Real-time assessment and reporting of time savings compared to legacy process.
+
+Tenant Interaction: One-click enablement via intuitive UI.
+
+Benefit: Immediate utilization of optimized FM Gateway, substantial onboarding time reduction.
+
+🚀 Tenant Onboarding Flow (Future State)
+New Simplified Workflow:
+
+Tenant accesses the FastLane Onboarding UI.
+
+Tenant initiates onboarding by entering basic information.
+
+AutoNamespace Provisioner automatically creates Kubernetes namespace.
+
+SecureAccess AutoRBAC automatically provisions IAM roles, system accounts, and AWS Secrets Manager integration.
+
+GitAutoPilot creates and configures Git repos and onboard CI/CD bots automatically.
+
+Tenant selects FastRoute Gateway, automated provisioning and validation occur immediately.
+
+Tenant proceeds with minimal manual pipeline configuration (Pipeline QuickStart).
+
+Real-time visibility and automatic error handling through onboarding dashboard.
+
+🛠️ Tech Stack & Tools
+Component	Recommended Technology
+AutoNamespace Provisioner	Terraform / Kubernetes Operator, ArgoCD
+SecureAccess AutoRBAC	AWS IAM, Kubernetes OIDC, AWS Secrets Manager
+GitAutoPilot	GitHub API, GitLab API, Bot Frameworks (GitHub Apps, GitLab Apps)
+FastRoute Gateway	AWS API Gateway or Internal Gateway tooling
+Onboarding UI Portal	ReactJS / NextJS, NodeJS backend (or similar)
+📌 Benefits Achieved
+Dramatic Reduction in Tenant Effort: From multiple complex manual steps to intuitive, mostly automated clicks.
+
+Enhanced Speed: Onboarding time significantly reduced, comparable to Amazon Bedrock or SaaS-based solutions.
+
+Increased Reliability: Reduced human error through automated validations and standardization.
+
+Improved Visibility: Transparent onboarding with real-time status, feedback, and reporting dashboards.
+
+🎖️ Next Steps
+Initiate collaboration sessions with SRE for AutoNamespace Provisioner automation.
+
+Begin migration planning from HashiCorp Lockbox to AWS Secrets Manager.
+
+Prototype UI/UX design for intuitive onboarding portal.
+
+Pilot GitAutoPilot and SecureAccess AutoRBAC with select tenants.
+
+Validate benefits of FastRoute Gateway against the current FM gateway process.
+
