@@ -1,0 +1,120 @@
+# Proposal: Reduction in 40% Time to Deploy via Tenant Onboarding Automation
+
+## Business Problem
+
+Today we have a Template workflow which tenants fork and customize using a cookie-cutter process. This approach is error-prone due to varying individual machine configurations. Additionally, tenants often make mistakes in answering configuration questions, leading to incorrect or inconsistent configurations, resulting in delays and manual corrections.
+
+---
+
+## Proposal
+
+We are proposing the following improved automated onboarding approach:
+
+### 1. Conversion of Appendix-A Data
+
+* The current onboarding solution design document exists in Word format, with tenant information in the Appendix-A section.
+* We will convert this section into a structured format, such as a macro-enabled spreadsheet.
+* The spreadsheet data will then be programmatically converted into a standardized JSON format.
+
+### 2. Automated PR Creation Using Lambda
+
+* The generated JSON file will be added to the AIX internal Git repository.
+* This action will trigger the OnePipeline (Jenkins pipeline), which will deploy (if not already deployed) and invoke an AWS Lambda function.
+* The Lambda function will:
+
+  * Pull the relevant tenant template code.
+  * Replace template Jinja variables with values from the JSON file using the AIX App discussed previously.
+  * Submit a Pull Request (PR) for tenant onboarding configuration changes.
+
+### 3. Extending the Automation to Namespace Creation
+
+* The same automation framework will be extended to automate Namespace creation.
+* Namespace requests, currently a manual process, will become a Lambda-driven PR generation workflow.
+* We may choose to build either two separate Lambda functions (one for Workflow onboarding and one for Namespace creation) or a single Lambda with modular logic.
+* Namespace provisioning must be completed (approved PR) before workflow deployment proceeds.
+
+---
+
+## Key Benefits
+
+* **40% Reduction in Deployment Time**
+
+  * Automated onboarding and namespace creation significantly reduces delays.
+* **Error Prevention**
+
+  * Eliminates user-dependent manual steps, reducing configuration errors.
+* **Scalability**
+
+  * Centralized, consistent automation scales across multiple tenant onboardings.
+* **Alignment with AIX Platform Standards**
+
+  * Fully leverages existing OnePipeline and AWS Lambda execution model.
+
+---
+
+## Summary Workflow Diagram
+
+The end-to-end automated process for reducing deployment time and eliminating manual errors is detailed below:
+
+1. **Data Preparation**
+
+   * Platform team converts Appendix-A data from the solution design document into a structured spreadsheet.
+   * The spreadsheet is programmatically converted into a standardized JSON format for each tenant.
+
+2. **Triggering Automation**
+
+   * The JSON file is committed to the AIX internal Git repository dedicated to tenant onboarding configurations.
+   * This commit automatically triggers the OnePipeline (Jenkins) job.
+
+3. **AWS Lambda Execution**
+
+   * OnePipeline deploys (if not already deployed) and invokes the AWS Lambda function.
+   * Lambda pulls the latest tenant template code.
+   * Lambda reads the JSON file and replaces all Jinja template placeholders within the codebase with corresponding tenant-specific values.
+
+4. **Automated Pull Request Creation**
+
+   * Lambda creates a new feature branch in the tenant workflow repository.
+   * Lambda submits a Pull Request (PR) back to the main branch of the tenant workflow repository for review and approval.
+
+5. **Namespace Provisioning (Optional/Sequential)**
+
+   * In parallel or as a dependent step, Lambda may also submit a PR to the namespace repository for creating the required tenant namespace.
+   * The namespace PR must be approved and merged before workflow deployment can proceed.
+
+6. **Final Review & Merge**
+
+   * Once the namespace (if applicable) and workflow PRs are approved and merged, tenant onboarding is considered complete.
+
+```
+[Appendix-A Data → JSON Conversion]
+                ↓
+[Commit JSON to AIX Git Repo]
+                ↓
+[OnePipeline triggers AWS Lambda]
+                ↓
+[Lambda]
+    → Pulls tenant code
+    → Applies JSON data (replace Jinja templates)
+    → Submits PR to Workflow repo
+                ↓
+(Optional) Lambda submits PR to Namespace repo → PR approved → Workflow PR can proceed
+```
+
+---
+
+## Next Steps
+
+1. Define structured Appendix-A spreadsheet format.
+2. Develop JSON conversion pipeline.
+3. Create GitHub App with scoped PR submission permissions.
+4. Develop and deploy Lambda functions.
+5. Integrate AIX Git repo with OnePipeline trigger.
+6. Conduct end-to-end testing in sandbox environments.
+7. Roll out to production.
+
+---
+
+## Approval
+
+This document serves as the updated proposal for internal architecture review and approval by the platform leadership and security governance teams.
