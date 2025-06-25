@@ -1,0 +1,49 @@
+import os, json, jwt, time, requests, subprocess
+from pathlib import Path
+
+# Load your GitHub App private key (.pem)
+GITHUB_APP_ID = os.environ['GITHUB_APP_ID']
+GITHUB_INSTALLATION_ID = os.environ['INSTALLATION_ID']
+GITHUB_PRIVATE_KEY = os.environ['GITHUB_PRIVATE_KEY']  # PEM string or from Secrets Manager
+
+def generate_jwt(app_id, private_key_pem):
+    now = int(time.time())
+    payload = {
+        "iat": now - 60,
+        "exp": now + (10 * 60),
+        "iss": app_id
+    }
+    return jwt.encode(payload, private_key_pem, algorithm="RS256")
+
+def get_installation_token(jwt_token, installation_id):
+    headers = {
+        "Authorization": f"Bearer {jwt_token}",
+        "Accept": "application/vnd.github+json"
+    }
+    url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+    response = requests.post(url, headers=headers)
+    return response.json()['token']
+
+def lambda_handler(event, context):
+    # Generate JWT and Access Token
+    jwt_token = generate_jwt(GITHUB_APP_ID, GITHUB_PRIVATE_KEY)
+    access_token = get_installation_token(jwt_token, GITHUB_INSTALLATION_ID)
+
+    repo_url = f"https://x-access-token:{access_token}@github.com/<your-org>/<repo-name>.git"
+    clone_path = "/tmp/your-repo"
+
+    # Clean previous clone if exists
+    if Path(clone_path).exists():
+        subprocess.run(["rm", "-rf", clone_path])
+
+    # Clone the repo
+    subprocess.run(["git", "clone", repo_url, clone_path], check=True)
+
+    # Make a change to README or similar
+    with open(f"{clone_path}/README.md", "a") as f:
+        f.write("\nModified by Lambda\n")
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps("Repo cloned and modified successfully.")
+    }
