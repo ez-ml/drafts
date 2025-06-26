@@ -157,4 +157,4 @@ def test_lambda_handler():
             "body": json.dumps({"version": "v2.1"})
         }
 
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
