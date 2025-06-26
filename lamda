@@ -103,3 +103,58 @@ def test_lambda_handler_success(mock_open, mock_subprocess, mock_post, mock_jwt)
     # Check that README was modified
     mock_open.assert_called_with("/tmp/your-repo/README.md", "a")
 
+
+======
+
+
+# handler.py
+import boto3
+import json
+
+version = "v2.1"
+
+def lambda_handler(event: dict, context: dict):
+    client = boto3.client("secretsmanager")
+
+    get_secret_value_response = client.get_secret_value(
+        SecretId="cof/cos/BAGENAWORKFLOWENGINE/third-party-api-tokens-um/6bbda3a8-2fe7-4609-9eaf-98197a93570d/GITHUB_CLIENT_ID"
+    )
+
+    # Parse the JSON string from the secret
+    secret_dict = json.loads(get_secret_value_response["SecretString"])
+
+    return {
+        "ClientID": secret_dict["clientID"],  # assuming "clientID" key is present in secret
+        "body": json.dumps({"version": version}),
+    }
+
+
+
+# test_handler.py
+import json
+import handler
+from unittest.mock import patch
+
+def test_lambda_handler():
+    mock_event = {}
+    mock_context = {}
+
+    # Mock secret payload as if returned from Secrets Manager
+    mock_secret = {
+        "clientID": "200"
+    }
+
+    with patch("handler.boto3.client") as mock_boto_client:
+        mock_sm_client = mock_boto_client.return_value
+        mock_sm_client.get_secret_value.return_value = {
+            "SecretString": json.dumps(mock_secret)
+        }
+
+        result = handler.lambda_handler(mock_event, mock_context)
+
+        assert result == {
+            "ClientID": "200",
+            "body": json.dumps({"version": "v2.1"})
+        }
+
+
