@@ -158,3 +158,38 @@ def test_lambda_handler():
         }
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
+
+===
+
+
+# ---------- Build Stage ----------
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+COPY src/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+# ---------- Runtime Stage ----------
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /src
+
+# Install Python dependencies from built wheels
+COPY --from=builder /wheels /wheels
+RUN pip install --no-cache-dir /wheels/*
+
+# Copy application code and startup script
+COPY src/ /src/
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Use the startup script
+CMD ["/start.sh"]
+
